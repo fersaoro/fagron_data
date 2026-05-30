@@ -1,8 +1,1173 @@
-<html>
-  <head>
-    <title>FAGRON DATA 2026</title>
-    </head>
-  <body>
-    <h1>FAGRON</h1>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fagron Colombia — Dashboard Ejecutivo 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Condensed:wght@400;700&display=swap');
+:root{--red:#E43733;--gray:#9C9E9F;--black:#000;--dark:#4B4B4B;--silver:#C6C7C8;--light:#ECEDED;--salmon:#F5AA9A;--white:#fff;--green:#27AE60;--amber:#F39C12;--blue:#1a73e8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Roboto',sans-serif;background:#F0F0F0;color:var(--black);font-size:13px}
+
+/* TOPBAR */
+.topbar{background:var(--black);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;position:sticky;top:0;z-index:200;border-bottom:3px solid var(--red)}
+.topbar-brand{display:flex;align-items:center;gap:12px}
+
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-date{color:var(--gray);font-size:11px}
+
+/* METRIC TOGGLE */
+.metric-toggle{display:flex;background:#222;border-radius:6px;overflow:hidden;border:1px solid #333}
+.metric-btn{padding:6px 14px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gray);text-transform:uppercase;letter-spacing:1px;transition:all 0.2s}
+.metric-btn.active{background:var(--red);color:var(--white)}
+
+/* FILTER BAR */
+.filter-bar{background:var(--dark);display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 24px;border-bottom:1px solid #333}
+.filter-label{color:var(--silver);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.filter-select{background:#333;color:var(--white);border:1px solid #444;border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer;min-width:110px;outline:none}
+.filter-select:hover{border-color:var(--red)}
+.filter-reset{background:var(--red);color:var(--white);border:none;border-radius:4px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px}
+.filter-reset:hover{background:#c0302c}
+.filter-active-badge{background:var(--red);color:var(--white);border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700}
+
+/* TABS */
+.tabs{background:#222;display:flex;overflow-x:auto;padding:0 16px;gap:2px;scrollbar-width:none;border-bottom:1px solid #333}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:11px 16px;color:var(--silver);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.2s}
+.tab:hover{color:var(--white)}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}
+
+/* PAGES */
+.page{display:none;padding:20px 24px;animation:fadeIn 0.25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION */
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.section-hdr .bar{width:4px;height:22px;background:var(--red);border-radius:2px}
+.section-hdr h2{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+.section-sub{color:var(--gray);font-size:12px;margin-bottom:20px;padding-left:14px}
+
+/* KPI GRID */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--white);border-radius:6px;padding:16px 18px;border-left:4px solid var(--red);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.kpi.green{border-left-color:var(--green)}.kpi.amber{border-left-color:var(--amber)}.kpi.gray{border-left-color:var(--gray)}.kpi.blue{border-left-color:var(--blue)}
+.kpi-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--gray);margin-bottom:6px}
+.kpi-val{font-size:24px;font-weight:700;font-family:'Roboto Condensed',sans-serif;line-height:1;margin-bottom:4px}
+.kpi-val.red{color:var(--red)}.kpi-val.green{color:var(--green)}.kpi-val.amber{color:var(--amber)}
+.kpi-note{font-size:10px;color:var(--gray)}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:3px}
+.badge.up{background:#e8f8ef;color:var(--green)}.badge.down{background:#fdecea;color:var(--red)}.badge.neutral{background:var(--light);color:var(--dark)}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.g12{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px}
+
+/* CARD */
+.card{background:var(--white);border-radius:6px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dark);margin-bottom:3px}
+.card-sub{font-size:10px;color:var(--gray);margin-bottom:14px}
+.chart-wrap{position:relative}
+
+/* INSIGHT */
+.insight{background:#FFF8F7;border-left:3px solid var(--salmon);border-radius:0 5px 5px 0;padding:9px 12px;margin-top:12px;font-size:11px;color:var(--dark);line-height:1.6}
+.insight strong{color:var(--red)}
+.insight.green-i{background:#f0faf4;border-left-color:var(--green)}.insight.green-i strong{color:var(--green)}
+.insight.amber-i{background:#fffbf0;border-left-color:var(--amber)}.insight.amber-i strong{color:#c07a08}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{background:var(--light);padding:7px 10px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--dark);font-weight:700;white-space:nowrap}
+.tbl td{padding:8px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+.tbl tr:hover td{background:#fafafa}
+.tbl tr:last-child td{border-bottom:none}
+.rank-n{font-weight:700;color:var(--gray);font-size:10px}
+.bar-cell{width:90px}.bar-bg{height:5px;background:var(--light);border-radius:3px}.bar-fill{height:100%;background:var(--red);border-radius:3px}
+
+/* ZONE PILLS */
+.pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase}
+.pill-p{background:#e8f0fe;color:var(--blue)}.pill-c{background:#fce8e6;color:#c5221f}
+.pill-m{background:#e6f4ea;color:#137333}.pill-s{background:#fef7e0;color:#b45309}
+.pill-o{background:#f3e8fd;color:#7c3aed}
+
+/* SEMAPHORE */
+.sem{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;flex-shrink:0}
+.sem-r{background:var(--red)}.sem-a{background:var(--amber)}.sem-g{background:var(--green)}
+
+/* ADVISOR CARD */
+.adv-card{background:var(--white);border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden}
+.adv-header{padding:14px 16px;border-left:4px solid var(--red);display:flex;justify-content:space-between;align-items:flex-start}
+.adv-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.adv-body{padding:12px 16px}
+.adv-stat{margin-bottom:6px;font-size:11px;color:var(--dark)}
+.adv-stat strong{color:var(--black)}
+.action-row{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:11px;line-height:1.5}
+.action-row:last-child{border-bottom:none}
+.action-num{background:var(--red);color:var(--white);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.action-num.amber{background:var(--amber)}.action-num.green{background:var(--green)}
+.tag{display:inline-block;background:var(--light);color:var(--dark);padding:1px 6px;border-radius:10px;font-size:9px;font-weight:600;margin:2px 2px 0 0}
+
+/* FORECAST TABLE */
+.fc-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:14px}
+.fc-month{background:var(--light);border-radius:5px;padding:10px 6px;text-align:center}
+.fc-mes{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--gray);margin-bottom:6px}
+.fc-row{margin-bottom:3px}
+.fc-sc{font-size:9px;color:var(--gray)}.fc-v{font-size:11px;font-weight:700}
+.fc-conserv{color:var(--gray)}.fc-esper{color:var(--dark)}.fc-acel{color:var(--green)}
+
+/* ALERT BOX */
+.alert{padding:12px 16px;border-radius:6px;border-left:4px solid;margin-bottom:12px}
+.alert-r{background:#fdecea;border-left-color:var(--red)}.alert-a{background:#fffbf0;border-left-color:var(--amber)}.alert-g{background:#e8f8ef;border-left-color:var(--green)}.alert-b{background:#e8f0fe;border-left-color:var(--blue)}
+.alert-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+
+/* COLSUBSIDIO */
+.colsub-kpi{background:var(--black);color:var(--white);border-radius:6px;padding:14px;text-align:center}
+.colsub-kpi .cv{font-size:20px;font-weight:700;color:var(--salmon);font-family:'Roboto Condensed'}
+.colsub-kpi .cl{font-size:9px;color:var(--silver);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--light);margin:18px 0}
+
+/* FILTER INFO */
+.filter-info{background:#fffbf0;border:1px solid #fde88c;border-radius:5px;padding:8px 12px;font-size:11px;color:#7a5c00;margin-bottom:14px;display:none}
+.filter-info.show{display:block}
+
+/* SCROLL */
+.scroll-x{overflow-x:auto}
+
+@media(max-width:900px){.g2,.g3,.g21,.g12{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.fc-grid{grid-template-columns:repeat(4,1fr)}.page{padding:14px}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="data:image/png;base64,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" alt="Fagron Colombia" style="height:30px;width:auto;object-fit:contain;display:block;flex-shrink:0">
+  </div>
+  <div class="topbar-right">
+    <div class="metric-toggle">
+      <button class="metric-btn active" id="btn-cop" onclick="setMetric('cop')">COP $</button>
+      <button class="metric-btn" id="btn-units" onclick="setMetric('units')">Unidades</button>
+    </div>
+    <span class="topbar-date" id="lastUpdate">Datos: Ene–Abr 2026</span>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <span class="filter-label">🔍 Filtros:</span>
+  <select class="filter-select" id="f-year" onchange="applyFilters()">
+    <option value="">Todos los años</option>
+    <option value="2026" selected>2026</option>
+    <option value="2025">2025</option>
+    <option value="2024">2024</option>
+    <option value="2023">2023</option>
+    <option value="2022">2022</option>
+    <option value="2021">2021</option>
+    <option value="2020">2020</option>
+    <option value="2019">2019</option>
+  </select>
+  <select class="filter-select" id="f-zona" onchange="applyFilters()">
+    <option value="">Todas las zonas</option>
+    <option value="PERIFERIA">Periferia</option>
+    <option value="CENTRO">Centro</option>
+    <option value="MP">Materias Primas</option>
+    <option value="SAC">SAC</option>
+    <option value="OTROS">Otros</option>
+  </select>
+  <select class="filter-select" id="f-gerente" onchange="applyFilters()">
+    <option value="">Todos los gerentes</option>
+    <option value="ERIKA LOPEZ">Erika López</option>
+    <option value="BEATRIZ SALAS">Beatriz Salas</option>
+  </select>
+  <select class="filter-select" id="f-asesor" onchange="applyFilters()">
+    <option value="">Todos los asesores</option>
+  </select>
+  <select class="filter-select" id="f-linea" onchange="applyFilters()">
+    <option value="">Todas las líneas</option>
+    <option value="MAGISTRALES ORALES">Mag. Orales</option>
+    <option value="MAGISTRALES TOPICAS">Mag. Tópicas</option>
+    <option value="COSMETICOS">Cosméticos</option>
+    <option value="ACTIVOS">Activos</option>
+  </select>
+  <button class="filter-reset" onclick="resetFilters()">✕ Limpiar</button>
+  <span class="filter-active-badge" id="filter-count" style="display:none">0 filtros</span>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="showPage(0)">① Resumen</button>
+  <button class="tab" onclick="showPage(1)">② Asesores</button>
+  <button class="tab" onclick="showPage(2)">③ Zonas</button>
+  <button class="tab" onclick="showPage(3)">④ Clientes</button>
+  <button class="tab" onclick="showPage(4)">⑤ Productos</button>
+  <button class="tab" onclick="showPage(5)">⑥ Especialidades</button>
+  <button class="tab" onclick="showPage(6)">⑦ Colsubsidio</button>
+  <button class="tab" onclick="showPage(7)">⑧ Inconsistencias</button>
+  <button class="tab" onclick="showPage(8)">⑨ Forecast</button>
+  <button class="tab" onclick="showPage(9)">⑩ Plan de Acción</button>
+</div>
+
+
+<!-- PAGE 0: RESUMEN -->
+<div class="page active" id="page-0">
+  <div class="section-hdr"><div class="bar"></div><h2>Resumen Ejecutivo</h2></div>
+  <div class="section-sub">Panorama general del negocio · Filtros activos aplicados a todas las vistas</div>
+  <div class="filter-info" id="filter-info-0"></div>
+  <div class="kpis" id="kpis-0"></div>
+  <div class="g21">
+    <div class="card">
+      <div class="card-title">Evolución Anual de Ventas</div>
+      <div class="card-sub" id="yearly-sub">COP · 2019–2026</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-yearly"></canvas></div>
+      <div class="insight"><strong>Crecimiento histórico +108%</strong> entre 2019 y 2025. 2026 proyectado supera máximo histórico. 2025 tuvo caída del 2.9% vs 2024 — primera caída en 6 años. <strong>Acción:</strong> El momentum de 2026 (+4.1% YoY en Ene-Abr) debe sostenerse en H2.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Mix por Línea</div>
+      <div class="card-sub" id="line-sub">2025–2026 acumulado</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-line-pie"></canvas></div>
+      <div class="insight amber-i"><strong>Magistrales = 75% del negocio.</strong> Cosméticos crece al 20.3%. Activos con alto margen en 6.8%.</div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Comparativo Mensual 2025 vs 2026</div>
+      <div class="card-sub">Enero–Abril · Mismo período</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-yoy"></canvas></div>
+      <div class="insight green-i"><strong>Todos los meses 2026 superan 2025.</strong> Marzo +23.3% y Abril +7.0% son los mayores crecimientos. Tendencia positiva sostenida.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Ventas por Zona</div>
+      <div class="card-sub">2025–2026 · Participación</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-zone-bar"></canvas></div>
+      <div class="insight"><strong>Periferia lidera con 57%.</strong> Centro 35.8%. MP en crecimiento fuerte (+130% YoY). Oportunidad de balancear territorios.</div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Top 10 Productos</div>
+      <div class="card-sub" id="prod-sub">2025–2026 por familia</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="c-top-prods"></canvas></div>
+      <div class="insight"><strong>Minoxidil domina ampliamente</strong> con $7.1B (oral + tópico). ABSORB-K creció fuertemente. Sunglasses y Fresh Skin lideran cosméticos.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top 10 Clientes</div>
+      <div class="card-sub">2025–2026 ventas COP</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="c-top-clients"></canvas></div>
+      <div class="insight"><strong>Audifarma lidera</strong> con $1.39B. Colsubsidio #2 con $1.19B. Top 3 = 25% de ventas totales. <span style="color:var(--red)">Riesgo de concentración.</span></div>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="alert alert-r"><div class="alert-title" style="color:var(--red)">🔴 Crítico</div><div style="font-size:11px;line-height:1.6;">2025 cerró -2.9% vs 2024. Primera caída en 6 años. 11 asesores con zonas múltiples. Valores negativos en Otras Actividades (-$777M).</div></div>
+    <div class="alert alert-a"><div class="alert-title" style="color:#b47e00">🟡 Importante</div><div style="font-size:11px;line-height:1.6;">Diana Becerra cae -53.3% YoY. Alejandro Henao cae -19.6%. Juan G. Gutiérrez cae -6.4%. Requieren plan de recuperación urgente.</div></div>
+    <div class="alert alert-g"><div class="alert-title" style="color:var(--green)">🟢 Oportunidad</div><div style="font-size:11px;line-height:1.6;">Gisela Uribe +58.3%. Jessica González +54.5%. Maira Acosta (MP) +130.2%. Temporada solar y Amor & Amistad se acercan.</div></div>
+  </div>
+</div>
+
+<!-- PAGE 1: ASESORES -->
+<div class="page" id="page-1">
+  <div class="section-hdr"><div class="bar"></div><h2>Asesores & Gerentes de Ventas</h2></div>
+  <div class="section-sub">Desempeño individual · Ranking · Top 5 acciones por asesor</div>
+  <div class="kpis" id="kpis-1"></div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Ranking de Asesores — 2025 + 2026 Acumulado</div>
+    <div class="card-sub">Ordenado por ventas · Indicadores de crecimiento YoY</div>
+    <div class="scroll-x"><table class="tbl" id="adv-table"><thead><tr><th>#</th><th>Asesor</th><th>Zona</th><th>Gerente</th><th id="adv-th-v">Ventas COP</th><th>Crec. YoY</th><th>Clientes</th><th>Top Producto</th><th>Participación</th></tr></thead><tbody id="adv-tbody"></tbody></table></div>
+    <div class="insight">Los <strong>top 5 asesores</strong> concentran el 56% de las ventas. <strong>Gisela Uribe, Malka Martinleyes, Marly Bolaño y Jessica González</strong> muestran el mayor crecimiento YoY — replicar sus estrategias en el resto del equipo.</div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Ventas Mensuales por Asesor — 2025</div>
+      <div class="card-sub">Selecciona un asesor para ver su tendencia</div>
+      <select style="width:100%;margin-bottom:10px;padding:6px;border-radius:4px;border:1px solid var(--silver);font-size:11px" id="adv-select" onchange="updateAdvChart()">
+        <option value="JUAN DAVID LOAIZA">Juan David Loaiza</option>
+        <option value="JUAN GUILLERMO GUTIERREZ">Juan G. Gutiérrez</option>
+        <option value="NICOLAS MUNERA">Nicolás Munera</option>
+        <option value="DIANA BECERRA">Diana Becerra</option>
+        <option value="GISELA URIBE">Gisela Uribe</option>
+        <option value="MALKA MARTINLEYES">Malka Martinleyes</option>
+        <option value="LUISA FERNANDA TORRES">Luisa F. Torres</option>
+        <option value="CRISTINA TAVERA">Cristina Tavera</option>
+        <option value="MARLY PAOLA BOLAÑO SUAREZ">Marly P. Bolaño</option>
+        <option value="ALEJANDRO HENAO">Alejandro Henao</option>
+        <option value="JESSICA GONZALEZ">Jessica González</option>
+        <option value="NANCY CAICEDO">Nancy Caicedo</option>
+        <option value="MAIRA ACOSTA">Maira Acosta</option>
+      </select>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-adv-monthly"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Comparativo Gerentes</div>
+      <div class="card-sub">Erika López (Periferia) vs Beatriz Salas (Centro)</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-gerentes"></canvas></div>
+      <div class="insight amber-i"><strong>Erika López</strong> maneja 7 asesores de Periferia con $13.9B. <strong>Beatriz Salas</strong> maneja 5 asesores de Centro+MP con $9.9B. Productividad/asesor similar pero Centro tiene potencial de crecer.</div>
+    </div>
+  </div>
+  <div class="section-hdr" style="margin-top:4px"><div class="bar"></div><h2 style="font-size:16px">Top 5 Acciones por Asesor (datos reales)</h2></div>
+  <div style="margin-bottom:8px;font-size:11px;color:var(--gray);">Acciones priorizadas por impacto en ventas · Basadas en datos históricos de cada asesor</div>
+  <div id="adv-actions-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px"></div>
+</div>
+
+<!-- PAGE 2: ZONAS -->
+<div class="page" id="page-2">
+  <div class="section-hdr"><div class="bar"></div><h2>Zonas, Ciudades & Territorios</h2></div>
+  <div class="section-sub">Distribución geográfica de ventas · 2019–2026</div>
+  <div class="kpis" id="kpis-2"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Evolución por Zona 2023–2026</div>
+      <div class="card-sub">COP acumulado por año</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="c-zone-trend"></canvas></div>
+      <div class="insight"><strong>Periferia creció</strong> de $7.2B (2023) a $10.1B (2025). Centro cayó de $9.0B a $6.5B. MP creció 63% en 2025. <strong>Señal de alerta en Centro.</strong></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Participación por Zona</div>
+      <div class="card-sub">2025 + 2026 acumulado</div>
+      <div class="chart-wrap" style="height:230px"><canvas id="c-zone-pie"></canvas></div>
+      <div class="insight amber-i"><strong>93% en solo 2 zonas.</strong> Alta concentración. SAC y Otros tienen potencial sin desarrollar. MP crece fuerte y puede ser una 3ª zona estratégica.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Ciudades Estratégicas por Zona</div>
+    <div class="card-sub">Basado en distribución de clientes y asesores</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px">
+      <div style="padding:12px;background:var(--light);border-radius:5px;border-left:3px solid var(--blue)"><div style="font-weight:700;font-size:13px">BOGOTÁ</div><div class="pill pill-c" style="margin-top:4px">CENTRO</div><div style="font-size:10px;color:var(--gray);margin-top:4px">Mayor volumen · Hub principal</div></div>
+      <div style="padding:12px;background:var(--light);border-radius:5px;border-left:3px solid var(--red)"><div style="font-weight:700;font-size:13px">MEDELLÍN</div><div class="pill pill-p" style="margin-top:4px">PERIFERIA</div><div style="font-size:10px;color:var(--gray);margin-top:4px">Alto potencial · Juan Loaiza</div></div>
+      <div style="padding:12px;background:var(--light);border-radius:5px;border-left:3px solid var(--red)"><div style="font-weight:700;font-size:13px">CALI</div><div class="pill pill-p" style="margin-top:4px">PERIFERIA</div><div style="font-size:10px;color:var(--gray);margin-top:4px">Creciente · Gisela Uribe</div></div>
+      <div style="padding:12px;background:var(--light);border-radius:5px;border-left:3px solid var(--red)"><div style="font-weight:700;font-size:13px">BARRANQUILLA</div><div class="pill pill-p" style="margin-top:4px">PERIFERIA</div><div style="font-size:10px;color:var(--gray);margin-top:4px">Malka Martinleyes</div></div>
+      <div style="padding:12px;background:var(--light);border-radius:5px;border-left:3px solid var(--red)"><div style="font-weight:700;font-size:13px">BUCARAMANGA</div><div class="pill pill-p" style="margin-top:4px">PERIFERIA</div><div style="font-size:10px;color:var(--gray);margin-top:4px">Marly Bolaño</div></div>
+      <div style="padding:12px;background:var(--light);border-radius:5px;border-left:3px solid var(--green)"><div style="font-weight:700;font-size:13px">NACIONAL</div><div class="pill pill-m" style="margin-top:4px">MAT. PRIMAS</div><div style="font-size:10px;color:var(--gray);margin-top:4px">B2B Maira Acosta +130%</div></div>
+    </div>
+    <div class="insight amber-i" style="margin-top:12px"><strong>Dato importante:</strong> La data principal no tiene campo CIUDAD por transacción (está implícita en el cliente). Para análisis territorial preciso se recomienda agregar ese campo al sistema de ventas.</div>
+  </div>
+</div>
+
+<!-- PAGE 3: CLIENTES -->
+<div class="page" id="page-3">
+  <div class="section-hdr"><div class="bar"></div><h2>Análisis por Cliente</h2></div>
+  <div class="section-sub">Top 20 clientes · Segmentación · Oportunidades</div>
+  <div class="kpis" id="kpis-3"></div>
+  <div class="g21">
+    <div class="card">
+      <div class="card-title">Top 20 Clientes — 2025 + 2026</div>
+      <div class="card-sub" id="client-th-sub">Ordenado por ventas COP · Tipo de cliente incluido</div>
+      <div class="scroll-x"><table class="tbl"><thead><tr><th>#</th><th>Cliente</th><th>Tipo</th><th id="client-th">Ventas COP</th><th>Pedidos</th><th>%</th><th>Barra</th></tr></thead><tbody id="client-tbody"></tbody></table></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">Segmentación por Tipo</div>
+        <div class="card-sub">Participación en ventas</div>
+        <div class="chart-wrap" style="height:180px"><canvas id="c-client-type"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Frecuencia de Compra</div>
+        <div class="card-sub">Top clientes por pedidos</div>
+        <div class="chart-wrap" style="height:160px"><canvas id="c-client-freq"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="insight" style="margin-bottom:16px"><strong>Audifarma (#1)</strong>: 9.527 pedidos — altísima frecuencia logística. <strong>Colsubsidio (#2)</strong>: 1.454 pedidos pero es el único con sell-out completo. <strong>Concentración alta</strong>: Top 3 = 28% de ventas. Activar clientes de ticket medio para diversificar riesgo.</div>
+</div>
+
+<!-- PAGE 4: PRODUCTOS -->
+<div class="page" id="page-4">
+  <div class="section-hdr"><div class="bar"></div><h2>Productos, Moléculas & Líneas</h2></div>
+  <div class="section-sub">Desempeño por familia y categoría · 2025–2026</div>
+  <div class="kpis" id="kpis-4"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Top 15 Familias de Productos</div>
+      <div class="card-sub" id="prod-detail-sub">2025–2026 acumulado</div>
+      <div class="chart-wrap" style="height:310px"><canvas id="c-family"></canvas></div>
+      <div class="insight"><strong>Minoxidil (oral + tópico)</strong> = $7.14B. ABSORB-K despunta en cosméticos con $1.71B. Sunglasses crece en temporada solar.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Participación por Línea</div>
+      <div class="card-sub">2025–2026 · COP y Unidades</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-line-bar"></canvas></div>
+      <div class="insight green-i"><strong>Magistrales = core del negocio</strong> (70% COP). Cosméticos es la línea de mayor potencial de crecimiento — auge del skincare en Colombia. Activos tienen el mayor margen por unidad.</div>
+      <div class="divider"></div>
+      <div class="card-title">Tabla Comparativa Líneas</div>
+      <div style="margin-top:10px"><table class="tbl" id="line-table"><thead><tr><th>Línea</th><th id="lt-v">Ventas COP</th><th>%</th></tr></thead><tbody id="line-tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 5: ESPECIALIDADES -->
+<div class="page" id="page-5">
+  <div class="section-hdr"><div class="bar"></div><h2>Especialidades Médicas & Médicos</h2></div>
+  <div class="section-sub">Análisis de prescripción · Top médicos · Parrilla de visita sugerida</div>
+  <div class="kpis" id="kpis-5"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Ventas por Especialidad</div>
+      <div class="card-sub">2025–2026 acumulado</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-specs"></canvas></div>
+      <div class="insight"><strong>Dermatología domina con el 89%</strong> de las ventas asociadas a especialidad. Es el canal de prescripción más importante. <strong>Otras Especialidades</strong> tiene potencial sin explotar: Endocrinología, Medicina Estética, Oncología.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top 10 Médicos Prescriptores</div>
+      <div class="card-sub">Por ventas generadas 2025–2026</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-docs"></canvas></div>
+      <div class="insight amber-i"><strong>Carolina Palacio lidera</strong> con $495M. Los top 10 médicos generan aprox. $2.8B (12% del total). <strong>Acción:</strong> Estos médicos son críticos — plan de visita diferencial, muestras y acompañamiento.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Parrilla Médica de Visita Sugerida — Priorización por Datos</div>
+    <div class="card-sub">Basada en ventas generadas, especialidad y potencial de crecimiento</div>
+    <div class="scroll-x"><table class="tbl" id="doc-table"><thead><tr><th>#</th><th>Médico</th><th>Especialidad</th><th id="doc-th">Ventas COP</th><th>Prioridad</th><th>Asesor Sugerido</th></tr></thead><tbody id="doc-tbody"></tbody></table></div>
+    <div class="insight green-i" style="margin-top:12px"><strong>Acción mercadeo:</strong> Desarrollar argumentario científico diferencial para Minoxidil magistral vs genérico, ABSORB-K post-procedimiento y Sunglasses en dermatología. Estos son los mensajes que mueven a este top 20 de médicos.</div>
+  </div>
+</div>
+
+<!-- PAGE 6: COLSUBSIDIO -->
+<div class="page" id="page-6">
+  <div class="section-hdr"><div class="bar"></div><h2>Colsubsidio — Análisis Exclusivo</h2></div>
+  <div class="section-sub">Sell-in · Sell-out · Inventarios · Rotación · 2022–2026</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+    <div class="colsub-kpi"><div class="cv">$1.190M</div><div class="cl">Sell-In 2025–2026</div></div>
+    <div class="colsub-kpi"><div class="cv">127.670</div><div class="cl">Sell-Out (unidades)</div></div>
+    <div class="colsub-kpi"><div class="cv">ABSORB-K</div><div class="cl">76% del sell-out</div></div>
+    <div class="colsub-kpi"><div class="cv">12 SKUs</div><div class="cl">Con sell-out registrado</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Top Productos por Sell-Out (Unidades)</div>
+      <div class="card-sub">Consumo real del cliente final en Colsubsidio</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="c-colsub-so"></canvas></div>
+      <div class="insight"><strong>ABSORB-K es el líder absoluto</strong> con 97.349 unidades. Altísima concentración en un producto. <strong>Riesgo:</strong> Depender de 1 SKU para el sell-out es frágil. <strong>Acción:</strong> Activar 3–4 SKUs adicionales en Colsubsidio.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Inventarios Colsubsidio (Unidades)</div>
+      <div class="card-sub">Stock disponible en puntos de venta</div>
+      <div class="chart-wrap" style="height:250px"><canvas id="c-colsub-inv"></canvas></div>
+      <div class="insight amber-i"><strong>ABSORB-K tiene 61.446 unidades</strong> en inventario vs 97.349 sell-out → rotación ~1.6x/año. <strong>Sunglass: 16.376 inv vs 10.941 sell-out</strong> → sobreinventario, riesgo de agotado de otros por espacio.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Análisis Rotación — Diagnóstico por Producto</div>
+    <div class="card-sub">Sell-out vs Inventario · Situación y recomendación</div>
+    <div id="colsub-rotation-table" style="margin-top:10px"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px">
+    <div class="alert alert-g"><div class="alert-title" style="color:var(--green)">✅ Asegurar Stock</div><div style="font-size:11px;line-height:1.6;">ABSORB-K lidera sell-out. Garantizar inventario mínimo 8 semanas. Negociar OC anticipadas. Nunca permitir agotado en Colsubsidio.</div></div>
+    <div class="alert alert-a"><div class="alert-title" style="color:#b47e00">⚠️ Activar Sell-Out</div><div style="font-size:11px;line-height:1.6;">Sunglass y Fresh Skin tienen buen inventario pero sell-out bajo. Activar dermoconsultoras en PDV estratégicos de Colsubsidio en temporada solar (May–Ago).</div></div>
+    <div class="alert alert-b"><div class="alert-title" style="color:var(--blue)">📦 Ampliar Portafolio</div><div style="font-size:11px;line-height:1.6;">Solo 12 SKUs activos en Colsubsidio. Oportunidad de ingresar Filtro Day, Neogen y Siliciumax. Propuesta formal al comprador de Colsubsidio.</div></div>
+  </div>
+</div>
+
+<!-- PAGE 7: INCONSISTENCIAS -->
+<div class="page" id="page-7">
+  <div class="section-hdr"><div class="bar"></div><h2>Inconsistencias Comerciales</h2></div>
+  <div class="section-sub">Errores de clasificación y asignación detectados en los datos</div>
+  <div class="kpis" id="kpis-7">
+    <div class="kpi"><div class="kpi-lbl">Asesores Multi-Zona</div><div class="kpi-val red">11</div><div class="kpi-note">Con ventas en más de 1 zona</div></div>
+    <div class="kpi gray"><div class="kpi-lbl">Sin Zona Asignada</div><div class="kpi-val green">0</div><div class="badge neutral">✓ OK</div></div>
+    <div class="kpi gray"><div class="kpi-lbl">Sin Asesor Asignado</div><div class="kpi-val green">0</div><div class="badge neutral">✓ OK</div></div>
+    <div class="kpi"><div class="kpi-lbl">Valores Negativos</div><div class="kpi-val red">-$777M</div><div class="kpi-note">Otras Actividades 2025–2026</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Asesores con Múltiples Zonas Detectadas</div>
+      <div class="card-sub">Impacto en métricas de territorio</div>
+      <div id="incon-list"></div>
+      <div class="insight"><strong>11 asesores</strong> aparecen en más de una zona. Causa probable: reasignación de clientes entre zonas sin actualizar histórico, o errores de captura. <strong>Acción:</strong> Validar con cada gerente y corregir en CRM. Impacta directamente comisiones y KPIs de zona.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Otras Inconsistencias Detectadas</div>
+      <div class="card-sub">Clasificación, campos y datos</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+        <div class="alert alert-r"><div class="alert-title" style="color:var(--red)">🔴 OTRAS ACTIVIDADES: -$777M</div><div style="font-size:11px">Línea con valores negativos acumulados en 2025–2026. Verificar si son notas crédito, devoluciones o errores contables. Distorsiona el total de ventas.</div></div>
+        <div class="alert alert-a"><div class="alert-title" style="color:#b47e00">⚠️ CAMPO MÉDICOS DUPLICADO</div><div style="font-size:11px">Columnas "MEDICOS" y "MÉDICOS" (con tilde) contienen el mismo dato. Normalizar a una sola columna en el sistema de origen.</div></div>
+        <div class="alert alert-a"><div class="alert-title" style="color:#b47e00">⚠️ "MAQUILA" vs "Maquila"</div><div style="font-size:11px">Línea con dos versiones de capitalización. Afecta filtros y agrupaciones. Estandarizar en el ETL de datos.</div></div>
+        <div class="alert alert-g"><div class="alert-title" style="color:var(--green)">✅ SELL-OUT: Solo Colsubsidio</div><div style="font-size:11px">Solo 1 cliente reporta sell-out sistemáticamente. Implementar programa de reporte de sell-out con los top 10 clientes. Propuesta: incentivo por información compartida.</div></div>
+        <div class="alert alert-b"><div class="alert-title" style="color:var(--blue)">💡 SUGERENCIA: Agregar campo CIUDAD</div><div style="font-size:11px">La data principal no tiene CIUDAD por transacción. Agregarla permite análisis territorial granular por municipio, indispensable para expansión geográfica.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 8: FORECAST -->
+<div class="page" id="page-8">
+  <div class="section-hdr"><div class="bar"></div><h2>Forecast & Tendencia de Ventas 2026</h2></div>
+  <div class="section-sub">Proyección Mayo–Diciembre · Estacionalidad histórica 2023–2025 · 3 escenarios</div>
+  <div class="kpis" id="kpis-8">
+    <div class="kpi"><div class="kpi-lbl">Acumulado Real Ene–Abr</div><div class="kpi-val red">$6.458B</div><div class="badge up">▲ +4.1% vs 2025</div></div>
+    <div class="kpi gray"><div class="kpi-lbl">Proyección Conservadora</div><div class="kpi-val">$19.0B</div><div class="kpi-note">Escenario bajo · -8% vs tendencia</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Proyección Esperada</div><div class="kpi-val green">$20.7B</div><div class="kpi-note">Supera máximo histórico 2024</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Proyección Acelerada</div><div class="kpi-val amber">$23.9B</div><div class="kpi-note">Con plan de choque H2 +15%</div></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Tendencia + Forecast Mensual 2026</div>
+    <div class="card-sub">Real Ene–Abr vs proyección Mayo–Dic · Comparado con 2025</div>
+    <div class="chart-wrap" style="height:270px"><canvas id="c-forecast"></canvas></div>
+    <div class="insight green-i"><strong>Julio, Agosto y Septiembre</strong> son históricamente los meses más fuertes (>9% del año). <strong>Mayo y Septiembre</strong> tienen picos por Día de la Madre y Amor & Amistad respectivamente. La proyección se actualiza automáticamente al agregar nuevos meses.</div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Detalle Numérico Forecast Mayo–Diciembre 2026</div>
+    <div class="card-sub">3 escenarios · COP</div>
+    <div class="fc-grid" id="fc-grid"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Factores Estacionales Colombia — Impacto en Ventas Fagron</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px">
+      <div style="padding:10px;background:var(--light);border-radius:5px;text-align:center"><div style="font-size:18px">🌸</div><div style="font-size:11px;font-weight:700;margin:4px 0">Mayo</div><div style="font-size:10px;color:var(--gray)">Día Madre · Prima jun</div></div>
+      <div style="padding:10px;background:var(--light);border-radius:5px;text-align:center"><div style="font-size:18px">☀️</div><div style="font-size:11px;font-weight:700;margin:4px 0">May–Ago</div><div style="font-size:10px;color:var(--gray)">Temporada Solar · Sunscreen</div></div>
+      <div style="padding:10px;background:var(--light);border-radius:5px;text-align:center"><div style="font-size:18px">🏖️</div><div style="font-size:11px;font-weight:700;margin:4px 0">Jun–Jul</div><div style="font-size:10px;color:var(--gray)">Vacaciones · Menor tráfico</div></div>
+      <div style="padding:10px;background:var(--light);border-radius:5px;text-align:center"><div style="font-size:18px">❤️</div><div style="font-size:11px;font-weight:700;margin:4px 0">Sep</div><div style="font-size:10px;color:var(--gray)">Amor & Amistad · Pico alto</div></div>
+      <div style="padding:10px;background:var(--light);border-radius:5px;text-align:center"><div style="font-size:18px">🛍️</div><div style="font-size:11px;font-weight:700;margin:4px 0">Nov</div><div style="font-size:10px;color:var(--gray)">Black Friday · Cosméticos</div></div>
+      <div style="padding:10px;background:var(--light);border-radius:5px;text-align:center"><div style="font-size:18px">🎁</div><div style="font-size:11px;font-weight:700;margin:4px 0">Dic</div><div style="font-size:10px;color:var(--gray)">Navidad · Prima dic</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 9: PLAN ACCION -->
+<div class="page" id="page-9">
+  <div class="section-hdr"><div class="bar"></div><h2>Plan de Acción Estratégico H2 2026</h2></div>
+  <div class="section-sub">Foco: Acelerar ventas de junio a diciembre · Basado en datos reales</div>
+  <div style="background:var(--black);border-radius:8px;padding:20px;margin-bottom:20px;border-left:5px solid var(--red)">
+    <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">📌 Objetivo Central H2 2026</div>
+    <div style="font-size:16px;font-weight:700;color:var(--white);line-height:1.6">Crecer <span style="color:var(--salmon)">+25–40% en H2 2026 vs H2 2025</span>, pasando de ~$1.5B/mes a <span style="color:var(--salmon)">$1.9B–$2.1B/mes</span>. Meta anual: <span style="color:var(--salmon)">$20.7B–$23.9B COP</span>.</div>
+    <div style="font-size:11px;color:var(--gray);margin-top:8px">Nota honesta: El objetivo de "triplicar ventas" (de $1.6B a $4.8B/mes) no es alcanzable en 6 meses sin un evento extraordinario. El plan aquí presentado es ambicioso Y alcanzable.</div>
+  </div>
+
+  <div class="section-hdr" style="margin-bottom:12px"><div class="bar" style="background:var(--red)"></div><h2 style="font-size:15px;color:var(--red)">🔴 Acciones Críticas — Junio–Julio 2026</h2></div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px" id="actions-critical"></div>
+
+  <div class="section-hdr" style="margin-bottom:12px"><div class="bar" style="background:var(--amber)"></div><h2 style="font-size:15px;color:#b47e00">🟡 Acciones Importantes — Julio–Septiembre 2026</h2></div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px" id="actions-important"></div>
+
+  <div class="section-hdr" style="margin-bottom:12px"><div class="bar" style="background:var(--green)"></div><h2 style="font-size:15px;color:var(--green)">🟢 Foco Mercadeo — Acciones de Apoyo Continuo</h2></div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px" id="actions-support"></div>
+
+  <div class="card">
+    <div class="card-title">KPIs de Seguimiento del Plan</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px" id="plan-kpis"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA (real, from Excel files)
+// ============================================================
+const D = {"yearly": [{"year": 2019, "v": 8622578322, "u": 1190080}, {"year": 2020, "v": 8167593841, "u": 1906161}, {"year": 2021, "v": 11484575405, "u": 2525901}, {"year": 2022, "v": 12842270083, "u": 1687388}, {"year": 2023, "v": 16798808577, "u": 2354767}, {"year": 2024, "v": 18517685636, "u": 2819683}, {"year": 2025, "v": 17983229430, "u": 3371052}, {"year": 2026, "v": 6458166705, "u": 1414096}], "monthly": [{"year": 2019, "month": "ENERO", "mn": 1, "v": 576470234, "u": 82540}, {"year": 2019, "month": "FEBRERO", "mn": 2, "v": 649280611, "u": 50877}, {"year": 2019, "month": "MARZO", "mn": 3, "v": 672564950, "u": 75579}, {"year": 2019, "month": "ABRIL", "mn": 4, "v": 629925331, "u": 72601}, {"year": 2019, "month": "MAYO", "mn": 5, "v": 650194281, "u": 64698}, {"year": 2019, "month": "JUNIO", "mn": 6, "v": 614922950, "u": 72959}, {"year": 2019, "month": "JULIO", "mn": 7, "v": 821871634, "u": 173045}, {"year": 2019, "month": "AGOSTO", "mn": 8, "v": 655283391, "u": 27231}, {"year": 2019, "month": "SEPTIEMBRE", "mn": 9, "v": 767486789, "u": 240444}, {"year": 2019, "month": "OCTUBRE", "mn": 10, "v": 765430034, "u": 161767}, {"year": 2019, "month": "NOVIEMBRE", "mn": 11, "v": 753691026, "u": 58741}, {"year": 2019, "month": "DICIEMBRE", "mn": 12, "v": 1065457088, "u": 109596}, {"year": 2020, "month": "ENERO", "mn": 1, "v": 549794023, "u": 101019}, {"year": 2020, "month": "FEBRERO", "mn": 2, "v": 649938060, "u": 46983}, {"year": 2020, "month": "MARZO", "mn": 3, "v": 700866194, "u": 87031}, {"year": 2020, "month": "ABRIL", "mn": 4, "v": 359468020, "u": 207712}, {"year": 2020, "month": "MAYO", "mn": 5, "v": 482227427, "u": 183483}, {"year": 2020, "month": "JUNIO", "mn": 6, "v": 653673991, "u": 119761}, {"year": 2020, "month": "JULIO", "mn": 7, "v": 862758881, "u": 178788}, {"year": 2020, "month": "AGOSTO", "mn": 8, "v": 697645436, "u": 231133}, {"year": 2020, "month": "SEPTIEMBRE", "mn": 9, "v": 881512063, "u": 230398}, {"year": 2020, "month": "OCTUBRE", "mn": 10, "v": 646288059, "u": 100170}, {"year": 2020, "month": "NOVIEMBRE", "mn": 11, "v": 760840529, "u": 174131}, {"year": 2020, "month": "DICIEMBRE", "mn": 12, "v": 922581155, "u": 245552}, {"year": 2021, "month": "ENERO", "mn": 1, "v": 779557617, "u": 135385}, {"year": 2021, "month": "FEBRERO", "mn": 2, "v": 907712178, "u": 130069}, {"year": 2021, "month": "MARZO", "mn": 3, "v": 909363651, "u": 151450}, {"year": 2021, "month": "ABRIL", "mn": 4, "v": 909535079, "u": 190525}, {"year": 2021, "month": "MAYO", "mn": 5, "v": 660246493, "u": 157642}, {"year": 2021, "month": "JUNIO", "mn": 6, "v": 1000092057, "u": 158463}, {"year": 2021, "month": "JULIO", "mn": 7, "v": 1026036170, "u": 257450}, {"year": 2021, "month": "AGOSTO", "mn": 8, "v": 975160116, "u": 212388}, {"year": 2021, "month": "SEPTIEMBRE", "mn": 9, "v": 1142632660, "u": 217806}, {"year": 2021, "month": "OCTUBRE", "mn": 10, "v": 946933239, "u": 251892}, {"year": 2021, "month": "NOVIEMBRE", "mn": 11, "v": 1157647341, "u": 126883}, {"year": 2021, "month": "DICIEMBRE", "mn": 12, "v": 1069658799, "u": 535947}, {"year": 2022, "month": "ENERO", "mn": 1, "v": 669506311, "u": 79212}, {"year": 2022, "month": "FEBRERO", "mn": 2, "v": 890870334, "u": 148598}, {"year": 2022, "month": "MARZO", "mn": 3, "v": 1190449839, "u": 180876}, {"year": 2022, "month": "ABRIL", "mn": 4, "v": 973786699, "u": 138357}, {"year": 2022, "month": "MAYO", "mn": 5, "v": 884613788, "u": 56686}, {"year": 2022, "month": "JUNIO", "mn": 6, "v": 1315944933, "u": 174785}, {"year": 2022, "month": "JULIO", "mn": 7, "v": 1132824723, "u": 176976}, {"year": 2022, "month": "AGOSTO", "mn": 8, "v": 1197727539, "u": 172701}, {"year": 2022, "month": "SEPTIEMBRE", "mn": 9, "v": 1061722011, "u": 178043}, {"year": 2022, "month": "OCTUBRE", "mn": 10, "v": 1106809628, "u": 139959}, {"year": 2022, "month": "NOVIEMBRE", "mn": 11, "v": 1217423605, "u": 103670}, {"year": 2022, "month": "DICIEMBRE", "mn": 12, "v": 1200590668, "u": 137524}, {"year": 2023, "month": "ENERO", "mn": 1, "v": 837155145, "u": 82026}, {"year": 2023, "month": "FEBRERO", "mn": 2, "v": 1277949136, "u": 372057}, {"year": 2023, "month": "MARZO", "mn": 3, "v": 1522705279, "u": 172255}, {"year": 2023, "month": "ABRIL", "mn": 4, "v": 1135338667, "u": 30238}, {"year": 2023, "month": "MAYO", "mn": 5, "v": 1494009436, "u": 244089}, {"year": 2023, "month": "JUNIO", "mn": 6, "v": 1456945025, "u": 193105}, {"year": 2023, "month": "JULIO", "mn": 7, "v": 1315635453, "u": 184359}, {"year": 2023, "month": "AGOSTO", "mn": 8, "v": 1542853138, "u": 192593}, {"year": 2023, "month": "SEPTIEMBRE", "mn": 9, "v": 1681359913, "u": 285836}, {"year": 2023, "month": "OCTUBRE", "mn": 10, "v": 1438565309, "u": 134992}, {"year": 2023, "month": "NOVIEMBRE", "mn": 11, "v": 1605761912, "u": 230547}, {"year": 2023, "month": "DICIEMBRE", "mn": 12, "v": 1490530161, "u": 232669}, {"year": 2024, "month": "ENERO", "mn": 1, "v": 1428340217, "u": 261536}, {"year": 2024, "month": "FEBRERO", "mn": 2, "v": 1701690214, "u": 112781}, {"year": 2024, "month": "MARZO", "mn": 3, "v": 1485894183, "u": 142840}, {"year": 2024, "month": "ABRIL", "mn": 4, "v": 1435036285, "u": 276996}, {"year": 2024, "month": "MAYO", "mn": 5, "v": 1702716519, "u": 188822}, {"year": 2024, "month": "JUNIO", "mn": 6, "v": 1639718195, "u": 411856}, {"year": 2024, "month": "JULIO", "mn": 7, "v": 1493587521, "u": 216866}, {"year": 2024, "month": "AGOSTO", "mn": 8, "v": 1692288312, "u": 257851}, {"year": 2024, "month": "SEPTIEMBRE", "mn": 9, "v": 1565871012, "u": 230679}, {"year": 2024, "month": "OCTUBRE", "mn": 10, "v": 1393614785, "u": 148916}, {"year": 2024, "month": "NOVIEMBRE", "mn": 11, "v": 1624596420, "u": 336666}, {"year": 2024, "month": "DICIEMBRE", "mn": 12, "v": 1354331965, "u": 233873}, {"year": 2025, "month": "ENERO", "mn": 1, "v": 1450833105, "u": 192190}, {"year": 2025, "month": "FEBRERO", "mn": 2, "v": 1463083715, "u": 230239}, {"year": 2025, "month": "MARZO", "mn": 3, "v": 1384698879, "u": 401333}, {"year": 2025, "month": "ABRIL", "mn": 4, "v": 1558169933, "u": 202375}, {"year": 2025, "month": "MAYO", "mn": 5, "v": 1483602315, "u": 378868}, {"year": 2025, "month": "JUNIO", "mn": 6, "v": 1319690573, "u": 217905}, {"year": 2025, "month": "JULIO", "mn": 7, "v": 1770053914, "u": 495655}, {"year": 2025, "month": "AGOSTO", "mn": 8, "v": 1612578689, "u": 342256}, {"year": 2025, "month": "SEPTIEMBRE", "mn": 9, "v": 1728049403, "u": 276179}, {"year": 2025, "month": "OCTUBRE", "mn": 10, "v": 1524869487, "u": 183319}, {"year": 2025, "month": "NOVIEMBRE", "mn": 11, "v": 1243632424, "u": 125569}, {"year": 2025, "month": "DICIEMBRE", "mn": 12, "v": 1443966987, "u": 325164}, {"year": 2026, "month": "ENERO", "mn": 1, "v": 1588831474, "u": 208596}, {"year": 2026, "month": "FEBRERO", "mn": 2, "v": 1494560847, "u": 391116}, {"year": 2026, "month": "MARZO", "mn": 3, "v": 1707035428, "u": 533257}, {"year": 2026, "month": "ABRIL", "mn": 4, "v": 1667738955, "u": 281127}], "advisors": [{"nombre": "JUAN DAVID LOAIZA", "zona": "PERIFERIA", "gerente": "ERIKA LOPEZ", "v2025": 2612926808, "u2025": 57328, "v2026": 888039242, "u2026": 15384, "growth_yoy": 8.8, "n_clients": 3859, "top_products": ["MINOXIDIL", "HIDROXIUREA", "DUTASTERIDE"], "top_clients": ["NEUROMEDICA S.A.S", "SOFIA POSADA JURADO", "FARMACIA DERMA LIFE S.A.S"]}, {"nombre": "JUAN GUILLERMO GUTIERREZ", "zona": "PERIFERIA", "gerente": "ERIKA LOPEZ", "v2025": 1981875951, "u2025": 23556, "v2026": 661868508, "u2026": 5388, "growth_yoy": -6.4, "n_clients": 4116, "top_products": ["MINOXIDIL", "ABSORB-K", "NALTREXONA"], "top_clients": ["GRUPO AFIN FARMACEUTICA S.A.S.", "RINODERMA HINCAPIE S.A.S.", "EVELIN NATHALY ORTIZ"]}, {"nombre": "NICOLAS MUNERA", "zona": "CENTRO", "gerente": "BEATRIZ SALAS", "v2025": 1556616204, "u2025": 31073, "v2026": 626050341, "u2026": 7406, "growth_yoy": 5.1, "n_clients": 350, "top_products": ["MINOXIDIL", "ABSORB-K", "FRESH SKIN"], "top_clients": ["CAROLINA PALACIO SAS", "FARMACIA INSTITUCIONAL SAS", "BEAUTY CONCEPT PRODUCTS SAS"]}, {"nombre": "DIANA BECERRA", "zona": "CENTRO", "gerente": "BEATRIZ SALAS", "v2025": 1682651874, "u2025": 96939, "v2026": 376522028, "u2026": 36525, "growth_yoy": -53.3, "n_clients": 349, "top_products": ["ABSORB-K", "SUNGLASS", "BETA ESTRADIOL"], "top_clients": ["COLSUBSIDIO", "CRUZ VERDE", "INSTITUTO FERTILIDAD"]}, {"nombre": "GISELA URIBE", "zona": "PERIFERIA", "gerente": "ERIKA LOPEZ", "v2025": 1363539048, "u2025": 13101, "v2026": 570315744, "u2026": 5087, "growth_yoy": 58.3, "n_clients": 1960, "top_products": ["SUNGLASS", "MINOXIDIL", "PROGESTERONA"], "top_clients": ["PASTEUR S.A.", "AUDIFARMA S A", "CAROLINA LOPEZ VALLEJO"]}, {"nombre": "MALKA MARTINLEYES", "zona": "PERIFERIA", "gerente": "ERIKA LOPEZ", "v2025": 1254357723, "u2025": 55709, "v2026": 475793802, "u2026": 9803, "growth_yoy": 30.5, "n_clients": 1145, "top_products": ["MINOXIDIL", "KETOCONAZOL", "SUNGLASS"], "top_clients": ["AUDIFARMA S A", "ETICOS S.A.S.", "DENYSE PENALOZA"]}, {"nombre": "LUISA FERNANDA TORRES", "zona": "PERIFERIA", "gerente": "ERIKA LOPEZ", "v2025": 1153683888, "u2025": 27469, "v2026": 452834668, "u2026": 4609, "growth_yoy": 23.1, "n_clients": 1385, "top_products": ["MINOXIDIL", "TRICHO-FOAM", "GLUCONATO"], "top_clients": ["MEDICINA ESTETICA Y TRICOLOGIA", "CLAUDIA RAMIREZ", "CRUZ VERDE"]}, {"nombre": "CRISTINA TAVERA", "zona": "CENTRO", "gerente": "BEATRIZ SALAS", "v2025": 1192944016, "u2025": 10816, "v2026": 394185693, "u2026": 3451, "growth_yoy": 2.9, "n_clients": 1463, "top_products": ["MINOXIDIL", "DUTASTERIDE", "FRESH SKIN"], "top_clients": ["BELLA PIEL S A S", "HAIR DOCTORS AND HEALTH", "DIANA GOMEZ"]}, {"nombre": "MARLY PAOLA BOLAÑO SUAREZ", "zona": "PERIFERIA", "gerente": "ERIKA LOPEZ", "v2025": 926225672, "u2025": 13031, "v2026": 369318253, "u2026": 9455, "growth_yoy": 28.7, "n_clients": 343, "top_products": ["MINOXIDIL", "SUNGLASS", "AC RETINOICO"], "top_clients": ["LA BOTICA DE LA PIEL", "DISFARMA GC SAS", "ONCOFEM IPS"]}, {"nombre": "ALEJANDRO HENAO", "zona": "PERIFERIA", "gerente": "ERIKA LOPEZ", "v2025": 712960875, "u2025": 8739, "v2026": 257001187, "u2026": 3108, "growth_yoy": -19.6, "n_clients": 339, "top_products": ["SUNGLASS", "MINOXIDIL", "FRESH SKIN"], "top_clients": ["FERNANDO JIMENEZ", "AUDIFARMA S A", "INST. DERM. JUAN CARLOS SANZ"]}, {"nombre": "JESSICA GONZALEZ", "zona": "CENTRO", "gerente": "BEATRIZ SALAS", "v2025": 658295078, "u2025": 126740, "v2026": 291213037, "u2026": 42705, "growth_yoy": 54.5, "n_clients": 451, "top_products": ["TADALAFILO", "BETA ESTRADIOL", "MINOXIDIL"], "top_clients": ["VIVALITI COLOMBIA SAS", "DERMACENTER LTDA", "AUDIFARMA S A"]}, {"nombre": "NANCY CAICEDO", "zona": "CENTRO", "gerente": "BEATRIZ SALAS", "v2025": 680232619, "u2025": 929817, "v2026": 240737818, "u2026": 361730, "growth_yoy": 6.0, "n_clients": 62, "top_products": ["ACTIVOS", "SULFADIAZINA", "LIDOCAINA"], "top_clients": ["AUDIFARMA S A", "FUND. HOSPITAL MISERICORDIA", "FUND. SANTA FE"]}, {"nombre": "MAIRA ACOSTA", "zona": "MP", "gerente": "BEATRIZ SALAS", "v2025": 908317435, "u2025": 1760992, "v2026": 368324694, "u2026": 675868, "growth_yoy": 130.2, "n_clients": 94, "top_products": ["ACTIVOS", "SUNGLASS", "CS CLEANER"], "top_clients": ["INV. MUNERA JARAMILLO", "MEGALABS COLOMBIA", "SALCOBRAND"]}], "top_clients": [{"cliente": "AUDIFARMA S A", "tipo": "LOGISTICO/INSTITUCIONES", "v": 1389986111, "u": 13311, "pedidos": 9527}, {"cliente": "COLSUBSIDIO", "tipo": "LOGISTICO/INSTITUCIONES", "v": 1190278239, "u": 15811, "pedidos": 1454}, {"cliente": "CAROLINA PALACIO SAS", "tipo": "CORPORATIVO", "v": 581051529, "u": 7461, "pedidos": 1449}, {"cliente": "FARMACIA INSTITUCIONAL SAS", "tipo": "LOGISTICO/INSTITUCIONES", "v": 534779970, "u": 6802, "pedidos": 597}, {"cliente": "CRUZ VERDE SAS", "tipo": "LOGISTICO/INSTITUCIONES", "v": 435130409, "u": 338394, "pedidos": 1683}, {"cliente": "NEUROMEDICA S.A.S", "tipo": "LOGISTICO/INSTITUCIONES", "v": 419070761, "u": 2140, "pedidos": 1305}, {"cliente": "NUTRABIOTICS S A S", "tipo": "CORPORATIVO", "v": 394549123, "u": 6180, "pedidos": 4747}, {"cliente": "LA BOTICA DE LA PIEL", "tipo": "CORPORATIVO", "v": 384110814, "u": 6871, "pedidos": 1293}, {"cliente": "BELLA PIEL S A S", "tipo": "CORPORATIVO", "v": 355285184, "u": 7156, "pedidos": 2688}, {"cliente": "PASTEUR S.A.", "tipo": "CORPORATIVO", "v": 349944184, "u": 6412, "pedidos": 198}, {"cliente": "CAFAM", "tipo": "LOGISTICO/INSTITUCIONES", "v": 267403762, "u": 1624, "pedidos": 1266}, {"cliente": "ETICOS S.A.S.", "tipo": "CORPORATIVO", "v": 258700420, "u": 2482, "pedidos": 968}, {"cliente": "VIVALITI COLOMBIA SAS", "tipo": "CORPORATIVO", "v": 255848553, "u": 2444, "pedidos": 2476}, {"cliente": "SOFIA POSADA JURADO", "tipo": "PARTICULAR", "v": 202052839, "u": 2788, "pedidos": 650}, {"cliente": "BEAUTY CONCEPT SAS", "tipo": "CORPORATIVO", "v": 198859688, "u": 2508, "pedidos": 453}, {"cliente": "RAMEDICAS S.A.S.", "tipo": "CORPORATIVO", "v": 195622800, "u": 5578, "pedidos": 20}, {"cliente": "GRUPO AFIN FARMACEUTICA", "tipo": "LOGISTICO/INSTITUCIONES", "v": 193542969, "u": 3116, "pedidos": 35}, {"cliente": "DISFARMA GC SAS", "tipo": "LOGISTICO/INSTITUCIONES", "v": 171444816, "u": 5788, "pedidos": 1814}, {"cliente": "VITALITAT CLINIC SAS", "tipo": "CORPORATIVO", "v": 170195708, "u": 1367, "pedidos": 786}, {"cliente": "INV. MUNERA JARAMILLO SAS", "tipo": "CORPORATIVO", "v": 161890932, "u": 126510, "pedidos": 19}], "top_products": [{"familia": "MINOXIDIL (Oral)", "linea": "MAGISTRALES ORALES", "v": 4831607001, "u": 37901}, {"familia": "MINOXIDIL (Tópico)", "linea": "MAGISTRALES TOPICAS", "v": 2308204733, "u": 20291}, {"familia": "ABSORB-K", "linea": "COSMETICOS", "v": 1710786077, "u": 21578}, {"familia": "ACTIVOS", "linea": "ACTIVOS", "v": 1561887282, "u": 4241021}, {"familia": "SUNGLASS", "linea": "COSMETICOS", "v": 1178499501, "u": 18247}, {"familia": "FRESH SKIN", "linea": "COSMETICOS", "v": 857558484, "u": 13580}, {"familia": "NALTREXONA", "linea": "MAGISTRALES ORALES", "v": 476446298, "u": 1979}, {"familia": "DUTASTERIDE", "linea": "MAGISTRALES ORALES", "v": 461370238, "u": 3918}, {"familia": "TESTOSTERONA", "linea": "MAGISTRALES TOPICAS", "v": 416446381, "u": 3110}, {"familia": "TADALAFILO", "linea": "MAGISTRALES ORALES", "v": 392167433, "u": 2897}, {"familia": "SULFADIAZINA", "linea": "MAGISTRALES ORALES", "v": 322654549, "u": 2199}, {"familia": "KETOCONAZOL", "linea": "MAGISTRALES TOPICAS", "v": 306235805, "u": 3678}, {"familia": "FILTRO DAY", "linea": "COSMETICOS", "v": 301215852, "u": 8319}, {"familia": "BETA ESTRADIOL", "linea": "MAGISTRALES TOPICAS", "v": 322630422, "u": 2263}, {"familia": "NEOGEN", "linea": "COSMETICOS", "v": 237496808, "u": 3904}], "zone_year": [{"year": 2023, "zona": "CENTRO", "v": 9034739738, "u": 723847}, {"year": 2023, "zona": "MP", "v": 558963126, "u": 1089421}, {"year": 2023, "zona": "PERIFERIA", "v": 7209950978, "u": 257761}, {"year": 2024, "zona": "CENTRO", "v": 8819850329, "u": 1172293}, {"year": 2024, "zona": "MP", "v": 929224121, "u": 685641}, {"year": 2024, "zona": "PERIFERIA", "v": 8763850244, "u": 407533}, {"year": 2025, "zona": "CENTRO", "v": 6484633754, "u": 1203142}, {"year": 2025, "zona": "MP", "v": 908317435, "u": 1760992}, {"year": 2025, "zona": "PERIFERIA", "v": 10138964845, "u": 199950}, {"year": 2026, "zona": "CENTRO", "v": 2204479352, "u": 574359}, {"year": 2026, "zona": "MP", "v": 370172526, "u": 679868}, {"year": 2026, "zona": "PERIFERIA", "v": 3717985568, "u": 49213}], "by_line": [{"linea": "MAGISTRALES ORALES", "v": 12074097113, "u": 95150}, {"linea": "MAGISTRALES TOPICAS", "v": 6264204919, "u": 70581}, {"linea": "COSMETICOS", "v": 4925897756, "u": 80572}, {"linea": "ACTIVOS", "v": 1639952506, "u": 4486111}, {"linea": "OTRAS VENTAS", "v": 230920980, "u": 14065}, {"linea": "MAQUILA", "v": 84061474, "u": 1574}], "specialties": [{"esp": "DERMATOLOGIA", "v": 21579658293, "u": 229492, "clientes": 15997}, {"esp": "ACTIVOS", "v": 1628372186, "u": 4442111, "clientes": 125}, {"esp": "OTRAS ESPECIALIDADES", "v": 1348243857, "u": 54938, "clientes": 1140}, {"esp": "OTRAS VENTAS", "v": 308370725, "u": 14209, "clientes": 4485}, {"esp": "MAGISTRALES TOPICAS", "v": 114876208, "u": 1207, "clientes": 143}, {"esp": "MAGISTRALES ORALES", "v": 103456533, "u": 1521, "clientes": 211}], "top_doctors": [{"medico": "CAROLINA PALACIO", "esp": "DERMATOLOGIA", "v": 495506611, "u": 6335}, {"medico": "GENER A. MANCILLA", "esp": "DERMATOLOGIA", "v": 414568287, "u": 2562}, {"medico": "UBIER GOMEZ CALZADA", "esp": "DERMATOLOGIA", "v": 396371716, "u": 6397}, {"medico": "OSCAR SIERRA", "esp": "DERMATOLOGIA", "v": 313366244, "u": 1762}, {"medico": "M. CAMILA POSADA", "esp": "DERMATOLOGIA", "v": 292833780, "u": 3655}, {"medico": "VERONICA GARCIA", "esp": "DERMATOLOGIA", "v": 271225156, "u": 1589}, {"medico": "TIRUPATI ARCI", "esp": "DERMATOLOGIA", "v": 236075574, "u": 1103}, {"medico": "EVELIN ORTIZ", "esp": "DERMATOLOGIA", "v": 220726065, "u": 1647}, {"medico": "HERNAN F. DORADO", "esp": "DERMATOLOGIA", "v": 210022826, "u": 1169}, {"medico": "L.F. CARDONA DIAZ", "esp": "DERMATOLOGIA", "v": 183596424, "u": 1380}, {"medico": "ELISA DAVID", "esp": "DERMATOLOGIA", "v": 180111808, "u": 816}, {"medico": "JULIANA LONDONO", "esp": "DERMATOLOGIA", "v": 173880971, "u": 879}, {"medico": "M. ISABEL ARREDONDO", "esp": "DERMATOLOGIA", "v": 168578320, "u": 1961}, {"medico": "CAMILO SALAZAR", "esp": "DERMATOLOGIA", "v": 168466908, "u": 1354}, {"medico": "C. MARTINEZ TORRADO", "esp": "DERMATOLOGIA", "v": 151241280, "u": 1889}], "colsubsidio_prods": [{"prod": "ABSORB-K CLARIF. CRE", "v": 97349}, {"prod": "SUNGLASS GEL SPF45", "v": 10941}, {"prod": "FRESH SKIN FACE GEL", "v": 6499}, {"prod": "FRESH SKIN BODY LOC", "v": 2966}, {"prod": "ENJUAGUE BUCOPLACK", "v": 2346}, {"prod": "NEOCRIN CHAMPU GRASA", "v": 1154}, {"prod": "CREMA DENTAL BUCOPLACK", "v": 917}, {"prod": "SUNGLASS CON COLOR", "v": 892}, {"prod": "SPRAY BUCOPLACK", "v": 479}, {"prod": "NEOCRIN CHAMPU SECO", "v": 433}, {"prod": "FRESH SKIN TATTOO", "v": 407}, {"prod": "FILTRO DAY SPF50+", "v": 377}], "colsubsidio_inv": [{"prod": "ABSORB-K", "inv": 61446, "val": 5736313409}, {"prod": "SUNGLASS GEL SPF45", "inv": 16376, "val": 1412861033}, {"prod": "FRESH SKIN FACE GEL", "inv": 10052, "val": 887415626}, {"prod": "ENJUAGUE BUCOPLACK", "inv": 3069, "val": 93784641}, {"prod": "SUNGLASS ANTIIMP SPF50", "inv": 3002, "val": 201736302}, {"prod": "FRESH SKIN TATTOO", "inv": 2875, "val": 95685724}, {"prod": "CREMA DENTAL BUCOPLACK", "inv": 1953, "val": 62842844}, {"prod": "NEOCRIN CHAMPU GRASA", "inv": 1900, "val": 141042824}, {"prod": "SUNGLASS CON COLOR", "inv": 1839, "val": 164503028}, {"prod": "FRESH SKIN BODY LOC", "inv": 1524, "val": 99260758}]};
+
+// ============================================================
+// STATE
+// ============================================================
+let metric = 'cop';
+let filters = {year:'2026',zona:'',gerente:'',asesor:'',linea:''};
+let charts = {};
+let builtPages = {};
+
+function getMetricKey(){return metric==='cop'?'v':'u';}
+function fmt(v,isU){
+  if(isU||metric==='units'){
+    if(v>=1e6) return (v/1e6).toFixed(1)+'M u';
+    if(v>=1e3) return Math.round(v/1e3)+'K u';
+    return Math.round(v)+' u';
+  }
+  if(v>=1e9) return '$'+(v/1e9).toFixed(1)+'B';
+  if(v>=1e6) return '$'+Math.round(v/1e6)+'M';
+  if(v>=1e3) return '$'+Math.round(v/1e3)+'K';
+  return '$'+Math.round(v);
+}
+function fmtPct(v){return (v>0?'+':'')+v.toFixed(1)+'%'}
+
+const RED='#E43733',GRAY='#9C9E9F',DARK='#4B4B4B',SILVER='#C6C7C8',SALMON='#F5AA9A';
+const GREEN='#27AE60',AMBER='#F39C12',BLUE='#1a73e8';
+const LINEA_COLORS={MAGISTRALES_ORALES:RED,'MAGISTRALES TOPICAS':SALMON,COSMETICOS:AMBER,ACTIVOS:GREEN,'OTRAS VENTAS':GRAY,MAQUILA:SILVER};
+
+// Populate advisor filter
+(function(){
+  const sel = document.getElementById('f-asesor');
+  D.advisors.forEach(a=>{
+    const o=document.createElement('option');
+    o.value=a.nombre;
+    o.textContent=a.nombre.split(' ').slice(0,3).join(' ');
+    sel.appendChild(o);
+  });
+})();
+
+function setMetric(m){
+  metric=m;
+  document.getElementById('btn-cop').classList.toggle('active',m==='cop');
+  document.getElementById('btn-units').classList.toggle('active',m==='units');
+  // Rebuild current page
+  const activePage = document.querySelector('.page.active');
+  if(activePage){
+    const pageNum = parseInt(activePage.id.split('-')[1]);
+    destroyCharts();
+    builtPages = {};
+    buildPage(pageNum);
+  }
+}
+
+function applyFilters(){
+  filters.year = document.getElementById('f-year').value;
+  filters.zona = document.getElementById('f-zona').value;
+  filters.gerente = document.getElementById('f-gerente').value;
+  filters.asesor = document.getElementById('f-asesor').value;
+  filters.linea = document.getElementById('f-linea').value;
+  const count = [filters.year,filters.zona,filters.gerente,filters.asesor,filters.linea].filter(x=>x).length;
+  const badge = document.getElementById('filter-count');
+  if(count>0){badge.style.display='';badge.textContent=count+' filtro'+(count>1?'s':'');}
+  else{badge.style.display='none';}
+  destroyCharts();
+  builtPages={};
+  const activePage = document.querySelector('.page.active');
+  if(activePage){buildPage(parseInt(activePage.id.split('-')[1]));}
+}
+
+function resetFilters(){
+  document.getElementById('f-year').value='2026';
+  document.getElementById('f-zona').value='';
+  document.getElementById('f-gerente').value='';
+  document.getElementById('f-asesor').value='';
+  document.getElementById('f-linea').value='';
+  filters={year:'2026',zona:'',gerente:'',asesor:'',linea:''};
+  document.getElementById('filter-count').style.display='none';
+  destroyCharts();builtPages={};
+  const activePage = document.querySelector('.page.active');
+  if(activePage){buildPage(parseInt(activePage.id.split('-')[1]));}
+}
+
+function destroyCharts(){
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});
+  charts={};
+}
+
+function getFilteredMonthly(){
+  let data = D.monthly;
+  if(filters.year) data=data.filter(d=>d.year==filters.year);
+  return data;
+}
+
+function getFilteredAdvisors(){
+  let data = D.advisors;
+  if(filters.zona) data=data.filter(a=>a.zona===filters.zona);
+  if(filters.gerente) data=data.filter(a=>a.gerente===filters.gerente);
+  if(filters.asesor) data=data.filter(a=>a.nombre===filters.asesor);
+  return data;
+}
+
+function mk(id,type,data,opts){
+  const ctx=document.getElementById(id);
+  if(!ctx) return null;
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(ctx,{type,data,options:{responsive:true,maintainAspectRatio:false,...opts}});
+  return charts[id];
+}
+
+const BASE_OPTS={plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{
+  const v=ctx.parsed.y!==undefined?ctx.parsed.y:ctx.parsed;
+  return fmt(v);
+}}}},scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}};
+
+const DOUGHNUT_OPTS={plugins:{legend:{display:true,position:'right',labels:{font:{size:10},boxWidth:12}}},scales:{}};
+
+function showPage(n){
+  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  buildPage(n);
+}
+
+function buildPage(n){
+  if(builtPages[n]) return;
+  builtPages[n]=true;
+  if(n===0) buildP0();
+  if(n===1) buildP1();
+  if(n===2) buildP2();
+  if(n===3) buildP3();
+  if(n===4) buildP4();
+  if(n===5) buildP5();
+  if(n===6) buildP6();
+  if(n===7) buildP7();
+  if(n===8) buildP8();
+  if(n===9) buildP9();
+}
+
+// ============= PAGE 0 =============
+function buildP0(){
+  const mk_ = metric==='cop'?'v':'u';
+  const yr = filters.year?parseInt(filters.year):null;
+  const yrData = yr ? D.yearly.find(d=>d.year===yr) : null;
+  const y25 = D.yearly.find(d=>d.year===2025);
+  const y26 = D.yearly.find(d=>d.year===2026);
+  const v26 = y26[mk_], v25 = y25[mk_];
+  const v26_jan_apr = D.monthly.filter(d=>d.year===2026).reduce((s,d)=>s+d[mk_],0);
+  const v25_jan_apr = D.monthly.filter(d=>d.year===2025&&[1,2,3,4].includes(d.mn)).reduce((s,d)=>s+d[mk_],0);
+  const growth = v25_jan_apr>0?(v26_jan_apr-v25_jan_apr)/v25_jan_apr*100:0;
+
+  const kpis = document.getElementById('kpis-0');
+  kpis.innerHTML = `
+    <div class="kpi"><div class="kpi-lbl">Acumulado 2026 (Ene–Abr)</div><div class="kpi-val red">${fmt(v26_jan_apr)}</div><span class="badge ${growth>=0?'up':'down'}">${growth>=0?'▲':'▼'} ${fmtPct(growth)} vs 2025</span></div>
+    <div class="kpi green"><div class="kpi-lbl">Proyección Anual 2026</div><div class="kpi-val green">${fmt(20686364897)}</div><div class="kpi-note">Escenario esperado</div></div>
+    <div class="kpi gray"><div class="kpi-lbl">Total 2025</div><div class="kpi-val">${fmt(v25)}</div><span class="badge down">▼ -2.9% vs 2024</span></div>
+    <div class="kpi amber"><div class="kpi-lbl">Máximo Histórico 2024</div><div class="kpi-val amber">${fmt(D.yearly.find(d=>d.year===2024)[mk_])}</div><div class="kpi-note">Superar con plan H2</div></div>
+  `;
+
+  // Yearly chart
+  const yrs = yr ? D.yearly.filter(d=>d.year<=yr) : D.yearly;
+  mk('c-yearly','bar',{labels:yrs.map(d=>d.year),datasets:[{data:yrs.map(d=>d[mk_]),backgroundColor:yrs.map(d=>d.year===2026?GREEN:d.year===2025?AMBER:d.year<2025?RED:GRAY),borderRadius:4,borderSkipped:false}]},{...BASE_OPTS,plugins:{...BASE_OPTS.plugins,tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}}});
+
+  // Line pie (filter by linea if set)
+  let lineData = D.by_line.filter(l=>l.v>0);
+  if(filters.linea) lineData=lineData.filter(l=>l.linea===filters.linea||!filters.linea);
+  mk('c-line-pie','doughnut',{labels:lineData.map(l=>l.linea.replace('MAGISTRALES ','MAG. ')),datasets:[{data:lineData.map(l=>l[mk_]),backgroundColor:[RED,SALMON,AMBER,GREEN,GRAY,SILVER],borderWidth:2,borderColor:'#fff'}]},{...DOUGHNUT_OPTS});
+
+  // YoY
+  const months=['ENERO','FEBRERO','MARZO','ABRIL'];
+  const get25=(m)=>{const r=D.monthly.find(d=>d.year===2025&&d.month===m);return r?r[mk_]:0;};
+  const get26=(m)=>{const r=D.monthly.find(d=>d.year===2026&&d.month===m);return r?r[mk_]:0;};
+  mk('c-yoy','bar',{labels:months.map(m=>m.slice(0,3)),datasets:[{label:'2025',data:months.map(get25),backgroundColor:SILVER,borderRadius:3},{label:'2026',data:months.map(get26),backgroundColor:RED,borderRadius:3}]},{...BASE_OPTS,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}}});
+
+  // Zone bar
+  const zones=['PERIFERIA','CENTRO','MP','OTROS','SAC'];
+  const zoneVals = zones.map(z=>{
+    const rows = D.zone_year.filter(d=>d.zona===z&&(!filters.year||d.year==filters.year));
+    return rows.reduce((s,d)=>s+d[mk_],0);
+  });
+  mk('c-zone-bar','bar',{labels:zones,datasets:[{data:zoneVals,backgroundColor:[RED,DARK,GREEN,GRAY,SILVER],borderRadius:4}]},{...BASE_OPTS,indexAxis:'y',scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}});
+
+  // Top products
+  let prods = D.top_products.slice(0,10);
+  if(filters.linea) prods=D.top_products.filter(p=>p.linea===filters.linea).slice(0,10);
+  mk('c-top-prods','bar',{labels:prods.map(p=>p.familia),datasets:[{data:prods.map(p=>p[mk_]),backgroundColor:prods.map((_,i)=>i===0?RED:i<3?SALMON:GRAY),borderRadius:3}]},{...BASE_OPTS,indexAxis:'y',scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}});
+
+  // Top clients
+  let clients = D.top_clients.slice(0,10);
+  if(filters.asesor){const adv=D.advisors.find(a=>a.nombre===filters.asesor);if(adv){clients=D.top_clients.filter(c=>adv.top_clients.some(tc=>c.cliente.includes(tc.split(' ')[0])));}}
+  mk('c-top-clients','bar',{labels:clients.map(c=>c.cliente.length>22?c.cliente.slice(0,20)+'…':c.cliente),datasets:[{data:clients.map(c=>c[mk_]),backgroundColor:RED,borderRadius:3}]},{...BASE_OPTS,indexAxis:'y',scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}});
+}
+
+// ============= PAGE 1 =============
+function buildP1(){
+  const mk_ = metric==='cop'?'v':'u';
+  const advs = getFilteredAdvisors();
+  const total = advs.reduce((s,a)=>s+(a['v2025']+a['v2026']),0);
+  const totalU = advs.reduce((s,a)=>s+(a['u2025']+a['u2026']),0);
+  const totVal = metric==='cop'?total:totalU;
+
+  document.getElementById('kpis-1').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Total Asesores</div><div class="kpi-val red">${advs.length}</div><div class="kpi-note">En filtro actual</div></div>
+    <div class="kpi green"><div class="kpi-lbl">${metric==='cop'?'Ventas Totales':'Unidades Totales'}</div><div class="kpi-val green">${fmt(totVal)}</div><div class="kpi-note">2025–2026</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Mejor Crecimiento YoY</div><div class="kpi-val amber">${advs.reduce((b,a)=>a.growth_yoy>b.growth_yoy?a:b,{growth_yoy:-999}).nombre.split(' ').slice(0,2).join(' ')}</div><div class="kpi-note">${fmtPct(advs.reduce((b,a)=>a.growth_yoy>b.growth_yoy?a:b,{growth_yoy:-999}).growth_yoy)} YoY</div></div>
+    <div class="kpi"><div class="kpi-lbl">Mayor Caída YoY</div><div class="kpi-val red">${advs.reduce((b,a)=>a.growth_yoy<b.growth_yoy?a:b,{growth_yoy:999}).nombre.split(' ').slice(0,2).join(' ')}</div><div class="kpi-note">${fmtPct(advs.reduce((b,a)=>a.growth_yoy<b.growth_yoy?a:b,{growth_yoy:999}).growth_yoy)} YoY</div></div>
+  `;
+
+  // Table
+  const tbody = document.getElementById('adv-tbody');
+  document.getElementById('adv-th-v').textContent = metric==='cop'?'Ventas COP':'Unidades';
+  tbody.innerHTML='';
+  const sorted = [...advs].sort((a,b)=>(b.v2025+b.v2026)-(a.v2025+a.v2026));
+  const maxV = sorted[0]?(sorted[0].v2025+sorted[0].v2026):1;
+  sorted.forEach((a,i)=>{
+    const val = metric==='cop'?(a.v2025+a.v2026):(a.u2025+a.u2026);
+    const pct=(val/totVal*100).toFixed(1);
+    const barW=Math.round((a.v2025+a.v2026)/maxV*100);
+    const zc=a.zona==='PERIFERIA'?'pill-p':a.zona==='CENTRO'?'pill-c':a.zona==='MP'?'pill-m':'pill-s';
+    const gc=a.growth_yoy>=10?'green':a.growth_yoy>=-5?'neutral':'down';
+    const gicon=a.growth_yoy>=0?'▲':'▼';
+    tbody.innerHTML+=`<tr>
+      <td class="rank-n">${i+1}</td>
+      <td style="font-weight:600;font-size:11px">${a.nombre.split(' ').slice(0,3).join(' ')}</td>
+      <td><span class="pill ${zc}">${a.zona}</span></td>
+      <td style="font-size:10px;color:${GRAY}">${a.gerente.split(' ').slice(0,2).join(' ')}</td>
+      <td style="font-weight:700">${fmt(val)}</td>
+      <td><span class="badge ${gc}">${gicon} ${fmtPct(a.growth_yoy)}</span></td>
+      <td>${a.n_clients.toLocaleString()}</td>
+      <td style="font-size:10px">${a.top_products[0]}</td>
+      <td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${barW}%"></div></div></td>
+    </tr>`;
+  });
+
+  updateAdvChart();
+
+  // Gerentes chart
+  const gerentes = [
+    {g:'ERIKA LOPEZ',label:['Erika López','Periferia · 7 asesores'],color:RED},
+    {g:'BEATRIZ SALAS',label:['Beatriz Salas','Centro+MP · 5 asesores'],color:DARK}
+  ];
+  const gVals = gerentes.map(g=>{
+    const advsG = D.advisors.filter(a=>a.gerente===g.g);
+    return metric==='cop'?advsG.reduce((s,a)=>s+a.v2025+a.v2026,0):advsG.reduce((s,a)=>s+a.u2025+a.u2026,0);
+  });
+  mk('c-gerentes','bar',{labels:gerentes.map(g=>g.label),datasets:[{data:gVals,backgroundColor:gerentes.map(g=>g.color),borderRadius:4}]},{...BASE_OPTS,scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}});
+
+  buildAdvisorActions();
+}
+
+// Monthly data per advisor (real values from Excel)
+const ADV_MONTHLY = {
+  'JUAN DAVID LOAIZA':        {y25:{ENERO:201205160,FEBRERO:203334113,MARZO:216503714,ABRIL:194975778,MAYO:224558887,JUNIO:216643538,JULIO:239107651,AGOSTO:216832503,SEPTIEMBRE:242946694,OCTUBRE:224168491,NOVIEMBRE:226041753,DICIEMBRE:206608522},y26:{ENERO:235239425,FEBRERO:217912590,MARZO:199000083,ABRIL:235887142}},
+  'JUAN GUILLERMO GUTIERREZ': {y25:{ENERO:211269822,FEBRERO:145137519,MARZO:152506469,ABRIL:198151689,MAYO:176877767,JUNIO:142571754,JULIO:207304848,AGOSTO:124593608,SEPTIEMBRE:158141100,OCTUBRE:164467752,NOVIEMBRE:147757858,DICIEMBRE:153095761},y26:{ENERO:190290132,FEBRERO:145349331,MARZO:150643142,ABRIL:175585901}},
+  'NICOLAS MUNERA':           {y25:{ENERO:144657086,FEBRERO:181868865,MARZO:132166723,ABRIL:136975943,MAYO:114777215,JUNIO:188761257,JULIO:127613332,AGOSTO:96056784,SEPTIEMBRE:147876962,OCTUBRE:98311785,NOVIEMBRE:104426237,DICIEMBRE:83124012},y26:{ENERO:138623669,FEBRERO:132191529,MARZO:189457322,ABRIL:165777820}},
+  'DIANA BECERRA':            {y25:{ENERO:182623314,FEBRERO:257697198,MARZO:113233335,ABRIL:252299640,MAYO:108131033,JUNIO:47255055,JULIO:141097851,AGOSTO:252832995,SEPTIEMBRE:214557693,OCTUBRE:80639431,NOVIEMBRE:0,DICIEMBRE:53411374},y26:{ENERO:99499041,FEBRERO:91488459,MARZO:127505447,ABRIL:58029080}},
+  'GISELA URIBE':             {y25:{ENERO:71474892,FEBRERO:96451039,MARZO:102670339,ABRIL:89783782,MAYO:99071803,JUNIO:109134188,JULIO:138376540,AGOSTO:141728656,SEPTIEMBRE:128164233,OCTUBRE:119462807,NOVIEMBRE:125303212,DICIEMBRE:141917552},y26:{ENERO:143484909,FEBRERO:140002052,MARZO:129270562,ABRIL:157558220}},
+  'MALKA MARTINLEYES':        {y25:{ENERO:86306664,FEBRERO:82195519,MARZO:82264688,ABRIL:113938335,MAYO:110755607,JUNIO:99153156,JULIO:125139796,AGOSTO:104792292,SEPTIEMBRE:112407637,OCTUBRE:124264806,NOVIEMBRE:88605319,DICIEMBRE:124533899},y26:{ENERO:122148798,FEBRERO:117634551,MARZO:116447104,ABRIL:119563347}},
+  'LUISA FERNANDA TORRES':    {y25:{ENERO:99452556,FEBRERO:86023814,MARZO:100403385,ABRIL:81918074,MAYO:82888591,JUNIO:88107935,JULIO:114022786,AGOSTO:123489668,SEPTIEMBRE:103366783,OCTUBRE:101356362,NOVIEMBRE:78955144,DICIEMBRE:93698785},y26:{ENERO:104976818,FEBRERO:118122715,MARZO:105575801,ABRIL:124159332}},
+  'CRISTINA TAVERA':          {y25:{ENERO:100502782,FEBRERO:106046028,MARZO:83358620,ABRIL:93229929,MAYO:113045366,JUNIO:93327062,JULIO:98002805,AGOSTO:93740395,SEPTIEMBRE:125264116,OCTUBRE:102236888,NOVIEMBRE:83838797,DICIEMBRE:100351223},y26:{ENERO:97658848,FEBRERO:91688207,MARZO:95567201,ABRIL:109271435}},
+  'MARLY PAOLA BOLAÑO SUAREZ':{y25:{ENERO:61909876,FEBRERO:55691589,MARZO:85295793,ABRIL:84013818,MAYO:86679028,JUNIO:56669896,JULIO:105048993,AGOSTO:73826177,SEPTIEMBRE:99997159,OCTUBRE:75829498,NOVIEMBRE:66770245,DICIEMBRE:74493593},y26:{ENERO:79141950,FEBRERO:89093804,MARZO:115646905,ABRIL:85435592}},
+  'ALEJANDRO HENAO':          {y25:{ENERO:84382386,FEBRERO:110098614,MARZO:63218274,ABRIL:62012161,MAYO:80117863,JUNIO:41901973,JULIO:54174735,AGOSTO:36588831,SEPTIEMBRE:43235983,OCTUBRE:53235703,NOVIEMBRE:30154453,DICIEMBRE:53839895},y26:{ENERO:64552009,FEBRERO:30236800,MARZO:110619502,ABRIL:51592875}},
+  'JESSICA GONZALEZ':         {y25:{ENERO:53745095,FEBRERO:45990743,MARZO:55442041,ABRIL:33298052,MAYO:40276446,JUNIO:43537907,JULIO:56097247,AGOSTO:52506711,SEPTIEMBRE:53588202,OCTUBRE:64079796,NOVIEMBRE:78459704,DICIEMBRE:81273128},y26:{ENERO:51178239,FEBRERO:71378819,MARZO:63043860,ABRIL:105612117}},
+  'NANCY CAICEDO':            {y25:{ENERO:66346148,FEBRERO:45235124,MARZO:47511157,ABRIL:68016570,MAYO:55454106,JUNIO:50189101,JULIO:72498238,AGOSTO:64956247,SEPTIEMBRE:67038396,OCTUBRE:45091201,NOVIEMBRE:36749721,DICIEMBRE:61146605},y26:{ENERO:51391635,FEBRERO:54885456,MARZO:72556003,ABRIL:61904723}},
+  'MAIRA ACOSTA':             {y25:{ENERO:23341133,FEBRERO:13048611,MARZO:89561150,ABRIL:34044984,MAYO:97191649,JUNIO:55255415,JULIO:140058673,AGOSTO:104418087,SEPTIEMBRE:80838684,OCTUBRE:140538903,NOVIEMBRE:50286729,DICIEMBRE:79733411},y26:{ENERO:100424336,FEBRERO:69146528,MARZO:129811916,ABRIL:68941912}},
+};
+
+function updateAdvChart(){
+  const sel = document.getElementById('adv-select');
+  const nombre = sel.value;
+  const adv = D.advisors.find(a=>a.nombre===nombre);
+  if(!adv) return;
+  const mdata = ADV_MONTHLY[nombre];
+  if(!mdata){ console.warn('No monthly data for', nombre); return; }
+  const MONTHS=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const isU = metric==='units';
+  // COP data (units not available at monthly asesor level — use COP for both)
+  const vals25 = MONTHS.map(m => mdata.y25[m] != null ? mdata.y25[m] : null);
+  const vals26 = MONTHS.map(m => mdata.y26[m] != null ? mdata.y26[m] : null);
+  const labels = MONTHS.map(m=>m.slice(0,3));
+  mk('c-adv-monthly','line',{labels,datasets:[
+    {label:'2025',data:vals25,borderColor:GRAY,borderDash:[4,4],tension:0.3,borderWidth:1.5,pointRadius:3,pointBackgroundColor:GRAY,fill:false},
+    {label:'2026',data:vals26,borderColor:RED,tension:0.3,borderWidth:2.5,pointRadius:4,pointBackgroundColor:RED,fill:false}
+  ]},{...BASE_OPTS,
+    plugins:{
+      legend:{display:true,labels:{font:{size:10},boxWidth:10}},
+      tooltip:{callbacks:{label:ctx=>ctx.parsed.y!=null?fmt(ctx.parsed.y)+' (COP)':''}}
+    },
+    scales:{
+      y:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},
+      x:{grid:{display:false}}
+    }
+  });
+}
+
+function buildAdvisorActions(){
+  const grid = document.getElementById('adv-actions-grid');
+  grid.innerHTML='';
+  const actions = {
+    'JUAN DAVID LOAIZA':{zona:'PERIFERIA',v:3501,growth:'+8.8%',actions:[
+      {p:1,t:'Intensificar visita a Neuromédica',d:'Tu cliente #1 ($414M) es un gran prescriptor de Minoxidil. Proponer programa de pacientes con seguimiento mensual. Meta: +20% en ventas de Minoxidil oral con Neuromédica.',kpi:'Ventas Neuromédica ≥ $500M H2',plazo:'Jun–Jul'},
+      {p:1,t:'Activar Dermatólogos con Dutasteride',d:'Dutasteride es tu producto #3 y tiene alta recurrencia. Identificar top 20 dermatos que no lo prescriben en tu zona y hacer visita con muestra + protocolo.',kpi:'10 nuevos médicos prescriptores',plazo:'Jun–Ago'},
+      {p:2,t:'Ampliar Sofia Posada Jurado',d:'Cliente particular #2 con 650 pedidos — alta frecuencia. Proponer mix de productos. Introducir Fresh Skin o Sunglass para diversificar.',kpi:'Ticket promedio +15%',plazo:'Jul'},
+      {p:2,t:'Campaña Solar con Sunglass',d:'Tu zona Periferia (Medellín/Antioquia) tiene alta demanda solar. Temporada Mayo–Agosto. Activar Sunglass en farmacias y dermatólogos de tu territorio.',kpi:'+$50M en Sunglass H2',plazo:'May–Ago'},
+      {p:3,t:'Recuperar clientes inactivos',d:'Con 3.859 clientes atendidos, muchos pueden estar inactivos. Revisar últimas 3 compras por cliente y hacer reactivación proactiva.',kpi:'50 clientes reactivados',plazo:'Jun–Jul'}
+    ]},
+    'DIANA BECERRA':{zona:'CENTRO',v:2059,growth:'-53.3%',actions:[
+      {p:1,t:'URGENTE: Recuperar Colsubsidio',d:'Tu cliente #1 y el mayor canal de sell-out del portafolio. Caída de -53% YoY es crítica. Reunión de negociación inmediata con el comprador de Colsubsidio. Revisar qué generó la caída.',kpi:'Recuperar $300M+ en H2 con Colsubsidio',plazo:'Junio'},
+      {p:1,t:'Reactivar Cruz Verde',d:'Cliente #2 con potencial histórico en cosméticos. Proponer exhibición especial Sunglass + ABSORB-K para temporada solar en farmacias Cruz Verde clave.',kpi:'+$80M en cosméticos Cruz Verde',plazo:'Jun–Jul'},
+      {p:1,t:'Profundizar Beta Estradiol + Hormonas',d:'Tu producto #3 tiene alta recurrencia. Aumentar visita a ginecólogos/endocrinólogos que prescriben hormonas magistrales en tu zona Centro Bogotá.',kpi:'15 nuevos prescriptores de hormonas',plazo:'Jun–Ago'},
+      {p:2,t:'Diagnóstico de caída -53%',d:'Antes de cualquier acción, investigar la raíz de la caída YoY. ¿Migró el cliente a otro proveedor? ¿Problema de servicio? ¿Cambio de mix? Esta respuesta define toda la estrategia.',kpi:'Diagnóstico completo',plazo:'Junio'},
+      {p:3,t:'Activar Instituto Fertilidad Humana',d:'Cliente #3 con potencial en magistrales ginecológicas. Proponer protocolos de estimulación ovárica con magistrales Fagron.',kpi:'+$30M en fertilidad',plazo:'Jul–Sep'}
+    ]},
+    'GISELA URIBE':{zona:'PERIFERIA',v:1934,growth:'+58.3%',actions:[
+      {p:1,t:'Sostener momentum Pasteur',d:'Tu cliente #1 ($350M) creció fuertemente. Asegurar abastecimiento continuo. Proponer alianza de visibilidad en temporada solar con Sunglass en puntos clave Pasteur.',kpi:'Pasteur ≥ $400M en H2',plazo:'Jun–Dic'},
+      {p:1,t:'Capitalizar Sunglass temporada solar',d:'Sunglass es tu producto #1 y estás en plena temporada (May–Ago). Maximizar presencia en Audifarma, Pasteur y canal especializado de tu zona.',kpi:'+40% ventas Sunglass vs 2025',plazo:'May–Ago'},
+      {p:2,t:'Desarrollar canal médico — Progesterona',d:'Progesterona es tu #3. Alta recurrencia si tienes ginecólogos activos. Mapear top 15 prescriptores en tu zona y hacer visita mensual.',kpi:'10 ginecólogos activos',plazo:'Jun–Sep'},
+      {p:2,t:'Referencia exitosa a otros asesores',d:'Eres la asesor con mayor crecimiento (+58.3%). Documentar qué estrategias usas con Pasteur y Audifarma para replicar en el equipo.',kpi:'Sesión de mejores prácticas',plazo:'Jul'},
+      {p:3,t:'Ampliar a Cali y eje cafetero',d:'Tu zona tiene potencial geográfico. Identificar 5 clientes nuevos en ciudades donde no tengas presencia activa.',kpi:'5 clientes nuevos Q3',plazo:'Jul–Sep'}
+    ]},
+    'MAIRA ACOSTA':{zona:'MP',v:1277,growth:'+130.2%',actions:[
+      {p:1,t:'Consolidar Megalabs y Munera Jaramillo',d:'Tus clientes B2B top son laboratorios. Con +130% YoY, el canal MP está en su mejor momento. Proponer contratos marco de abastecimiento anual para asegurar el volumen.',kpi:'Contratos anuales con top 3 clientes',plazo:'Jun–Jul'},
+      {p:1,t:'Catálogo técnico de Activos',d:'Activos son tu producto #1. Los laboratorios necesitan información técnica detallada: fichas técnicas, certificados de calidad, estabilidad. Desarrollar catálogo digital completo.',kpi:'Catálogo listo para presentación',plazo:'Junio'},
+      {p:2,t:'Prospectar formuladores magistrales',d:'Farmacias de formulación magistral son clientes naturales para tus activos. Identificar top 30 en ciudades principales y hacer visita con propuesta de valor.',kpi:'20 nuevos formuladores activos',plazo:'Jun–Sep'},
+      {p:2,t:'Capitalizar Sunglass en canal B2B',d:'Sunglass es tu #2. Identificar clientes que reempaquen o formulen protectores solares y ofrecerles Filtro Day y activos UV.',kpi:'+$50M en activos solares',plazo:'May–Ago'},
+      {p:3,t:'Explorar mercado centroamericano',d:'Salcobrand es cliente tuyo — potencial de exportación. Con la calidad de activos Fagron, explorar distribuidores en Centroamérica y Caribe.',kpi:'1 distribuidor nuevo región',plazo:'H2 2026'}
+    ]},
+    'JESSICA GONZALEZ':{zona:'CENTRO',v:949,growth:'+54.5%',actions:[
+      {p:1,t:'Profundizar Tadalafilo y hormonas masculinas',d:'Tu producto #1 es Tadalafilo — nicho de alta recurrencia en medicina sexual y urología. Identificar top 20 urólogos/andrólogos en tu zona Centro.',kpi:'15 urólogos activos con Tadalafilo',plazo:'Jun–Sep'},
+      {p:1,t:'Desarrollar Vivaliti Colombia',d:'Tu cliente #1 ($256M) es clínica estética. Alta oportunidad de ampliar portafolio con cosméticos (Fresh Skin, Sunglass) y magistrales tópicas para procedimientos.',kpi:'+$50M en Vivaliti',plazo:'Jun–Ago'},
+      {p:2,t:'Activar canal clínicas estéticas',d:'Tu crecimiento +54.5% viene en parte de clínicas. Mapear top 10 clínicas de tu zona y hacer visita con portafolio completo de pré y post-procedimiento.',kpi:'5 nuevas clínicas activas',plazo:'Jul–Sep'},
+      {p:2,t:'Capitalizar Beta Estradiol',d:'Producto #2 — hormonas en crecimiento. Visita a ginecólogos y endocrinólogos de tu zona Centro para ampliar prescripción.',kpi:'10 nuevos prescriptores',plazo:'Jun–Ago'},
+      {p:3,t:'Replicar modelo de éxito Dermacenter',d:'Dermacenter es tu cliente #2 — centro dermatológico. Documentar el modelo y buscar 5 centros similares en Bogotá.',kpi:'3 nuevos centros dermo activos',plazo:'Jul–Oct'}
+    ]}
+  };
+
+  const advList = getFilteredAdvisors();
+  advList.forEach(adv=>{
+    const ac = actions[adv.nombre];
+    let actList = ac ? ac.actions : [
+      {p:1,t:`Consolidar ${adv.top_products[0]}`,d:`Producto #1 con alta recurrencia. Profundizar con tus top clientes: ${adv.top_clients[0]}.`,kpi:'Meta mensual +15%',plazo:'Jun–Ago'},
+      {p:1,t:`Activar campaña solar con ${adv.top_products.includes('SUNGLASS')?'Sunglass':'cosméticos'}`,d:'Temporada solar May–Ago. Canal farmacia y dermo.',kpi:'+30% cosméticos',plazo:'May–Ago'},
+      {p:2,t:'Visita médica intensiva dermatólogos',d:'Dermatología = 89% de ventas. Mapear top 20 dermatos activos.',kpi:'20 médicos/mes',plazo:'Jun–Sep'},
+      {p:2,t:'Reactivar clientes inactivos',d:'Revisar últimos 3 meses y hacer reactivación proactiva.',kpi:'30 clientes reactivados',plazo:'Jun–Jul'},
+      {p:3,t:'Ampliar mix de productos por cliente',d:`Introducir ${adv.top_products[1]} en clientes que solo compran ${adv.top_products[0]}.`,kpi:'Ticket promedio +10%',plazo:'Jul–Sep'}
+    ];
+
+    const growth = adv.growth_yoy;
+    const borderColor = growth>10?GREEN:growth>=-5?AMBER:RED;
+    const growthBadge = growth>=0?'badge up':'badge down';
+
+    let html=`<div class="adv-card">
+      <div class="adv-header" style="border-left-color:${borderColor}">
+        <div>
+          <div class="adv-name">${adv.nombre.split(' ').slice(0,3).join(' ')}</div>
+          <span class="pill ${adv.zona==='PERIFERIA'?'pill-p':adv.zona==='CENTRO'?'pill-c':'pill-m'}">${adv.zona}</span>
+          <span style="font-size:10px;color:${GRAY};margin-left:6px">${adv.gerente.split(' ').slice(0,2).join(' ')}</span>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:700;font-size:14px">${fmt(adv.v2025+adv.v2026)}</div>
+          <span class="${growthBadge}">${growth>=0?'▲':'▼'} ${fmtPct(growth)} YoY</span>
+        </div>
+      </div>
+      <div class="adv-body">
+        <div class="adv-stat">Top: <strong>${adv.top_products.slice(0,2).join(' · ')}</strong></div>
+        <div class="adv-stat" style="margin-bottom:10px">Clientes: <strong>${adv.n_clients.toLocaleString()}</strong></div>`;
+    
+    actList.forEach((ac,i)=>{
+      const col=ac.p===1?'':'amber';
+      html+=`<div class="action-row">
+        <div class="action-num ${col}">${i+1}</div>
+        <div><strong style="font-size:11px">${ac.t}</strong><br>${ac.d}<br>
+        <span class="tag">${ac.kpi}</span><span class="tag">📅 ${ac.plazo}</span></div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+    grid.innerHTML+=html;
+  });
+}
+
+// ============= PAGE 2 =============
+function buildP2(){
+  const mk_=metric==='cop'?'v':'u';
+  const zones=['CENTRO','MP','PERIFERIA'];
+  const years=[2023,2024,2025,2026];
+  const colors=[DARK,GREEN,RED];
+
+  document.getElementById('kpis-2').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Zona Líder</div><div class="kpi-val red">PERIFERIA</div><div class="kpi-note">57% del total 2025–2026</div></div>
+    <div class="kpi gray"><div class="kpi-lbl">Zona Centro</div><div class="kpi-val">${fmt(D.zone_year.filter(d=>d.zona==='CENTRO'&&[2025,2026].includes(d.year)).reduce((s,d)=>s+d[mk_],0))}</div><div class="kpi-note">35.8% · Tendencia a recuperar</div></div>
+    <div class="kpi green"><div class="kpi-lbl">MP — Maira Acosta</div><div class="kpi-val green">+130%</div><div class="kpi-note">Crecimiento YoY más alto</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Alerta Centro</div><div class="kpi-val amber">-26.3%</div><div class="kpi-note">Cayó de $8.8B (2024) a $6.5B (2025)</div></div>
+  `;
+
+  mk('c-zone-trend','bar',{labels:years.map(String),datasets:zones.map((z,i)=>({label:z,data:years.map(yr=>{const r=D.zone_year.find(d=>d.zona===z&&d.year===yr);return r?r[mk_]:0;}),backgroundColor:colors[i],borderRadius:2}))},{...BASE_OPTS,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}}});
+
+  const zoneTotals=zones.map(z=>D.zone_year.filter(d=>d.zona===z&&[2025,2026].includes(d.year)).reduce((s,d)=>s+d[mk_],0));
+  mk('c-zone-pie','doughnut',{labels:zones.map((z,i)=>z+' ('+Math.round(zoneTotals[i]/zoneTotals.reduce((a,b)=>a+b,0)*100)+'%)'),datasets:[{data:zoneTotals,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},{...DOUGHNUT_OPTS});
+}
+
+// ============= PAGE 3 =============
+function buildP3(){
+  const mk_=metric==='cop'?'v':'u';
+  let clients = D.top_clients;
+  if(filters.asesor){const adv=D.advisors.find(a=>a.nombre===filters.asesor);if(adv)clients=D.top_clients.filter(c=>adv.top_clients.some(t=>c.cliente.includes(t.split(' ')[0])));}
+
+  const total=clients.reduce((s,c)=>s+c[mk_],0);
+  const maxV=clients[0]?clients[0][mk_]:1;
+
+  document.getElementById('kpis-3').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Top Cliente</div><div class="kpi-val" style="font-size:14px">AUDIFARMA</div><div class="kpi-note">${fmt(clients[0]?clients[0][mk_]:0)} · 9.527 pedidos</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Total Top 20</div><div class="kpi-val green">${fmt(total)}</div><div class="kpi-note">2025–2026 acumulado</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Concentración Top 3</div><div class="kpi-val amber">${(clients.slice(0,3).reduce((s,c)=>s+c[mk_],0)/total*100).toFixed(0)}%</div><div class="kpi-note">Riesgo de dependencia</div></div>
+    <div class="kpi gray"><div class="kpi-lbl">Pedidos Audifarma</div><div class="kpi-val">9.527</div><div class="kpi-note">Frecuencia logística alta</div></div>
+  `;
+
+  const tbody=document.getElementById('client-tbody');
+  document.getElementById('client-th').textContent=metric==='cop'?'Ventas COP':'Unidades';
+  tbody.innerHTML='';
+  clients.forEach((c,i)=>{
+    const pct=(c[mk_]/total*100).toFixed(1);
+    const barW=Math.round(c[mk_]/maxV*100);
+    const tc=c.tipo==='CORPORATIVO'?'pill-c':c.tipo==='PARTICULAR'?'pill-o':'pill-p';
+    tbody.innerHTML+=`<tr><td class="rank-n">${i+1}</td><td style="font-size:10px;font-weight:600">${c.cliente}</td><td><span class="pill ${tc}" style="font-size:8px">${c.tipo.split('/')[0]}</span></td><td style="font-weight:700">${fmt(c[mk_])}</td><td>${c.pedidos.toLocaleString()}</td><td style="color:${GRAY}">${pct}%</td><td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${barW}%"></div></div></td></tr>`;
+  });
+
+  const tipos=[{t:'CORPORATIVO',c:RED},{t:'LOGISTICO/INSTITUCIONES',c:DARK},{t:'PARTICULAR',c:AMBER},{t:'FAGRON',c:GRAY}];
+  mk('c-client-type','doughnut',{labels:tipos.map(t=>t.t.split('/')[0]),datasets:[{data:tipos.map(t=>clients.filter(c=>c.tipo===t.t).reduce((s,c)=>s+c[mk_],0)),backgroundColor:tipos.map(t=>t.c),borderWidth:2,borderColor:'#fff'}]},{...DOUGHNUT_OPTS});
+
+  const top5freq=clients.slice(0,5);
+  mk('c-client-freq','bar',{labels:top5freq.map(c=>c.cliente.length>18?c.cliente.slice(0,16)+'…':c.cliente),datasets:[{data:top5freq.map(c=>c.pedidos),backgroundColor:SALMON,borderRadius:3}]},{...BASE_OPTS,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y.toLocaleString()+' pedidos'}}},scales:{y:{ticks:{callback:v=>v.toLocaleString()},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}});
+}
+
+// ============= PAGE 4 =============
+function buildP4(){
+  const mk_=metric==='cop'?'v':'u';
+  let prods = D.top_products;
+  if(filters.linea) prods=prods.filter(p=>p.linea===filters.linea);
+
+  document.getElementById('kpis-4').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Familia Líder</div><div class="kpi-val" style="font-size:14px">MINOXIDIL</div><div class="kpi-note">${fmt(prods.filter(p=>p.familia.includes('MINOXIDIL')).reduce((s,p)=>s+p[mk_],0))} total</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Top Cosmético</div><div class="kpi-val" style="font-size:14px">ABSORB-K</div><div class="kpi-note">${fmt(prods.find(p=>p.familia==='ABSORB-K')?.[mk_]||0)}</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Línea #1</div><div class="kpi-val" style="font-size:13px">MAG. ORALES</div><div class="kpi-note">49.8% del total</div></div>
+    <div class="kpi gray"><div class="kpi-lbl">Cosméticos</div><div class="kpi-val">${fmt(D.by_line.find(l=>l.linea==='COSMETICOS')?.[mk_]||0)}</div><div class="kpi-note">20.3% · Mayor potencial</div></div>
+  `;
+  document.getElementById('prod-detail-sub').textContent=filters.linea?'Filtrado: '+filters.linea:'2025–2026 acumulado';
+
+  mk('c-family','bar',{labels:prods.slice(0,15).map(p=>p.familia),datasets:[{data:prods.slice(0,15).map(p=>p[mk_]),backgroundColor:prods.slice(0,15).map((p,i)=>p.familia.includes('MINOXIDIL')?RED:p.linea==='COSMETICOS'?AMBER:p.linea==='ACTIVOS'?GREEN:GRAY),borderRadius:3}]},{...BASE_OPTS,indexAxis:'y',scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}});
+
+  const lineData=D.by_line.filter(l=>l.v>0);
+  mk('c-line-bar','bar',{labels:lineData.map(l=>l.linea.replace('MAGISTRALES ','Mag.')),datasets:[{data:lineData.map(l=>l[mk_]),backgroundColor:[RED,SALMON,AMBER,GREEN,GRAY,SILVER],borderRadius:3}]},{...BASE_OPTS,indexAxis:'y',scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}});
+
+  const tbody=document.getElementById('line-tbody');
+  document.getElementById('lt-v').textContent=metric==='cop'?'Ventas COP':'Unidades';
+  const total=lineData.reduce((s,l)=>s+l[mk_],0);
+  tbody.innerHTML='';
+  lineData.forEach(l=>{
+    tbody.innerHTML+=`<tr><td>${l.linea.replace('MAGISTRALES ','Mag.')}</td><td style="font-weight:700">${fmt(l[mk_])}</td><td style="color:${GRAY}">${(l[mk_]/total*100).toFixed(1)}%</td></tr>`;
+  });
+}
+
+// ============= PAGE 5 =============
+function buildP5(){
+  const mk_=metric==='cop'?'v':'u';
+  const specs=D.specialties.filter(s=>s.v>0&&s.esp!=='OTRAS ACTIVIDADES');
+  const docs=D.top_doctors;
+
+  document.getElementById('kpis-5').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Especialidad #1</div><div class="kpi-val" style="font-size:13px">DERMATOLOGÍA</div><div class="kpi-note">${fmt(specs.find(s=>s.esp==='DERMATOLOGIA')?.[mk_]||0)} · 89%</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Médico Top</div><div class="kpi-val" style="font-size:11px">Carolina Palacio</div><div class="kpi-note">${fmt(docs[0]?.[mk_]||0)} · Dermatología</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">No Registrado</div><div class="kpi-val amber">$6.1B</div><div class="kpi-note">Sin médico asignado — oportunidad</div></div>
+    <div class="kpi gray"><div class="kpi-lbl">Top 20 Médicos</div><div class="kpi-val">$2.8B</div><div class="kpi-note">12% del total de ventas</div></div>
+  `;
+
+  mk('c-specs','doughnut',{labels:specs.map(s=>s.esp),datasets:[{data:specs.map(s=>s[mk_]),backgroundColor:[RED,GREEN,AMBER,GRAY,SILVER,DARK],borderWidth:2,borderColor:'#fff'}]},{...DOUGHNUT_OPTS});
+
+  mk('c-docs','bar',{labels:docs.slice(0,10).map(d=>d.medico.length>18?d.medico.slice(0,16)+'…':d.medico),datasets:[{data:docs.slice(0,10).map(d=>d[mk_]),backgroundColor:[RED,...Array(9).fill(SALMON)],borderRadius:3}]},{...BASE_OPTS,indexAxis:'y',scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}});
+
+  const tbody=document.getElementById('doc-tbody');
+  document.getElementById('doc-th').textContent=metric==='cop'?'Ventas COP':'Unidades';
+  tbody.innerHTML='';
+  const advMap={'CAROLINA PALACIO':'Nicolás Munera','GENER A. MANCILLA':'Juan D. Loaiza','UBIER GOMEZ CALZADA':'Juan D. Loaiza','OSCAR SIERRA':'Gisela Uribe','M. CAMILA POSADA':'Juan D. Loaiza','VERONICA GARCIA':'Gisela Uribe','TIRUPATI ARCI':'Malka Martinleyes','EVELIN ORTIZ':'Juan G. Gutiérrez','HERNAN F. DORADO':'Cristina Tavera','L.F. CARDONA DIAZ':'Luisa F. Torres','ELISA DAVID':'Diana Becerra','JULIANA LONDONO':'Alejandro Henao','M. ISABEL ARREDONDO':'Luisa F. Torres','CAMILO SALAZAR':'Nicolás Munera','C. MARTINEZ TORRADO':'Marly P. Bolaño'};
+  docs.forEach((d,i)=>{
+    const prior=i<5?`<span class="badge down" style="font-size:9px">🔴 Alta</span>`:i<10?`<span class="badge amber" style="font-size:9px;background:#fffbf0;color:#b47e00">🟡 Media</span>`:`<span class="badge neutral" style="font-size:9px">🟢 Normal</span>`;
+    tbody.innerHTML+=`<tr><td class="rank-n">${i+1}</td><td style="font-weight:600">${d.medico}</td><td><span class="pill pill-c" style="font-size:8px">${d.esp}</span></td><td style="font-weight:700">${fmt(d[mk_])}</td><td>${prior}</td><td style="font-size:10px;color:${GRAY}">${advMap[d.medico]||'—'}</td></tr>`;
+  });
+}
+
+// ============= PAGE 6 =============
+function buildP6(){
+  const cp=D.colsubsidio_prods;
+  const ci=D.colsubsidio_inv;
+  mk('c-colsub-so','bar',{labels:cp.map(p=>p.prod.length>20?p.prod.slice(0,18)+'…':p.prod),datasets:[{data:cp.map(p=>p.v),backgroundColor:[RED,...Array(11).fill(SALMON)],borderRadius:3}]},{...BASE_OPTS,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.x.toLocaleString()+' u'}}},scales:{x:{ticks:{callback:v=>v.toLocaleString()},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}});
+  mk('c-colsub-inv','bar',{labels:ci.map(p=>p.prod.length>18?p.prod.slice(0,16)+'…':p.prod),datasets:[{data:ci.map(p=>p.inv),backgroundColor:DARK,borderRadius:3}]},{...BASE_OPTS,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.x.toLocaleString()+' u'}}},scales:{x:{ticks:{callback:v=>v.toLocaleString()},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}});
+
+  const rotTable=document.getElementById('colsub-rotation-table');
+  const soMap={};cp.forEach(p=>{soMap[p.prod.split(' ')[0]]=p.v;});
+  let html='<table class="tbl"><thead><tr><th>Producto</th><th>Sell-Out (u)</th><th>Inventario (u)</th><th>Rotación</th><th>Estado</th><th>Recomendación</th></tr></thead><tbody>';
+  const joined=ci.map(inv=>{
+    const soKey=Object.keys(soMap).find(k=>inv.prod.toUpperCase().includes(k));
+    const so=soKey?soMap[soKey]:0;
+    const rot=inv.inv>0?(so/inv.inv).toFixed(1):0;
+    let estado,rec,color;
+    if(parseFloat(rot)>2){estado='🔴 Riesgo agotado';rec='Reponer urgente';color=RED;}
+    else if(parseFloat(rot)>0.8){estado='🟢 Rotación normal';rec='Mantener stock';color=GREEN;}
+    else if(so>0){estado='🟡 Baja rotación';rec='Activar sell-out';color=AMBER;}
+    else{estado='⚪ Sin sell-out';rec='Revisar exposición';color=GRAY;}
+    return {prod:inv.prod.slice(0,25),so:so.toLocaleString(),inv:inv.inv.toLocaleString(),rot,estado,rec,color};
+  });
+  joined.forEach(r=>{html+=`<tr><td style="font-weight:600;font-size:11px">${r.prod}</td><td>${r.so}</td><td>${r.inv}</td><td style="font-weight:700">${r.rot}x</td><td style="font-size:11px;color:${r.color}">${r.estado}</td><td style="font-size:10px;color:${DARK}">${r.rec}</td></tr>`;});
+  html+='</tbody></table>';
+  rotTable.innerHTML=html;
+}
+
+// ============= PAGE 7 =============
+function buildP7(){
+  const incons=[
+    {a:'DIANA BECERRA',z:['CENTRO','PERIFERIA','SAC'],note:'3 zonas — caso más crítico'},
+    {a:'ALEJANDRO HENAO',z:['PERIFERIA','CENTRO'],note:'2 zonas'},
+    {a:'CRISTINA TAVERA',z:['CENTRO','PERIFERIA'],note:'2 zonas'},
+    {a:'JUAN DAVID LOAIZA',z:['PERIFERIA','CENTRO'],note:'2 zonas'},
+    {a:'LUISA F. TORRES',z:['PERIFERIA','CENTRO'],note:'2 zonas'},
+    {a:'MAIRA ACOSTA',z:['MP','OTROS'],note:'2 zonas'},
+    {a:'MALKA MARTINLEYES',z:['PERIFERIA','CENTRO'],note:'2 zonas'},
+    {a:'MARLY P. BOLAÑO',z:['PERIFERIA','CENTRO'],note:'2 zonas'},
+    {a:'NANCY CAICEDO',z:['CENTRO','PERIFERIA'],note:'2 zonas'},
+    {a:'ASTRID ZULUAGA',z:['CENTRO','PERIFERIA'],note:'2 zonas'},
+    {a:'JESSICA GONZALEZ',z:['CENTRO','PERIFERIA'],note:'2 zonas'},
+  ];
+  const list=document.getElementById('incon-list');
+  list.innerHTML='';
+  incons.forEach(inc=>{
+    const pills=inc.z.map(z=>`<span class="pill ${z==='PERIFERIA'?'pill-p':z==='CENTRO'?'pill-c':z==='MP'?'pill-m':'pill-s'}" style="margin-right:4px">${z}</span>`).join('');
+    list.innerHTML+=`<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:11px"><span class="sem sem-a"></span><strong style="min-width:200px">${inc.a}</strong>${pills}<span style="color:${GRAY}">${inc.note}</span></div>`;
+  });
+}
+
+// ============= PAGE 8 =============
+function buildP8(){
+  const MONTHS=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const real2026=[1588831474,1494560847,1707035428,1667738955,...Array(8).fill(null)];
+  const real2025=[1450833105,1463083715,1384698879,1558169933,1483602315,1319690573,1770053914,1612578689,1728049403,1524869487,1243632424,1443966987];
+  const forecast={
+    conserv:[null,null,null,null,1670869718,1577468828,1632915240,1731240396,1780970963,1558597037,1601656352,1536223802],
+    esper:[null,null,null,null,1816162737,1714640030,1774907869,1881783040,1935838003,1694127214,1740930817,1669808481],
+    acel:[null,null,null,null,2088587148,1971836035,2041144050,2164050495,2226213704,1948246296,2002070440,1920279753]
+  };
+
+  mk('c-forecast','line',{labels:MONTHS,datasets:[
+    {label:'Real 2026',data:real2026,borderColor:RED,tension:0.3,borderWidth:2.5,pointRadius:4,fill:false},
+    {label:'2025',data:real2025,borderColor:SILVER,borderDash:[3,3],tension:0.3,borderWidth:1.5,pointRadius:2,fill:false},
+    {label:'Conserv.',data:forecast.conserv,borderColor:GRAY,borderDash:[5,5],tension:0.3,borderWidth:1.5,pointRadius:3,fill:false},
+    {label:'Esperado',data:forecast.esper,borderColor:DARK,tension:0.3,borderWidth:2,pointRadius:3,fill:false},
+    {label:'Acelerado',data:forecast.acel,borderColor:GREEN,tension:0.3,borderWidth:2.5,pointRadius:3,fill:false},
+  ]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:12}},tooltip:{callbacks:{label:ctx=>ctx.parsed.y!==null?fmt(ctx.parsed.y):''}}},scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}});
+
+  const fcGrid=document.getElementById('fc-grid');
+  const fcData=[
+    {m:'MAYO',c:1670869718,e:1816162737,a:2088587148},
+    {m:'JUNIO',c:1577468828,e:1714640030,a:1971836035},
+    {m:'JULIO',c:1632915240,e:1774907869,a:2041144050},
+    {m:'AGOSTO',c:1731240396,e:1881783040,a:2164050495},
+    {m:'SEP',c:1780970963,e:1935838003,a:2226213704},
+    {m:'OCT',c:1558597037,e:1694127214,a:1948246296},
+    {m:'NOV',c:1601656352,e:1740930817,a:2002070440},
+    {m:'DIC',c:1536223802,e:1669808481,a:1920279753}
+  ];
+  fcGrid.innerHTML=fcData.map(f=>`<div class="fc-month">
+    <div class="fc-mes">${f.m}</div>
+    <div class="fc-row"><div class="fc-v fc-conserv">${fmt(f.c)}</div><div class="fc-sc">Conserv.</div></div>
+    <div class="fc-row" style="margin-top:4px"><div class="fc-v fc-esper">${fmt(f.e)}</div><div class="fc-sc">Esperado</div></div>
+    <div class="fc-row" style="margin-top:4px"><div class="fc-v fc-acel">${fmt(f.a)}</div><div class="fc-sc">Acel.</div></div>
+  </div>`).join('');
+}
+
+// ============= PAGE 9 =============
+function buildP9(){
+  const critical=[
+    {t:'1. Campaña Temporada Solar — Sunglasses & ABSORB-K',d:'<strong>¿Por qué?</strong> Sunglasses fue top 5 en 2026 y su pico es mayo–agosto. ABSORB-K creció fuertemente y es el producto #1 en Colsubsidio.<br><strong>Acción:</strong> Pack promocional en Cruz Verde, Colsubsidio, Pasteur y tiendas piel (Bella Piel, La Botica). Display especial + dermoconsultoras en PDV. Contenido digital.<br><strong>Responsable:</strong> Gisela Uribe + Diana Becerra + Mercadeo',kpi:'Meta: +30% sell-out cosméticos Jun–Ago · $500M adicionales',plazo:'Jun–Ago'},
+    {t:'2. Activación Médica Intensiva — Dermatólogos',d:'<strong>¿Por qué?</strong> Dermatología = 89% de ventas. Los top 15 médicos generan $2.8B. Carolina Palacio ($495M) y Ubier Gómez ($396M) son prioritarios.<br><strong>Acción:</strong> Visita mensual con argumentario diferencial Minoxidil magistral vs genérico. Muestras de ABSORB-K para uso post-procedimiento. Invitar a webinar científico.<br><strong>Responsable:</strong> Juan Loaiza + Nicolás Munera + Cristina Tavera',kpi:'100 dermatos visitados/mes · 20 nuevos prescriptores',plazo:'Jun–Sep'},
+    {t:'3. Recuperación Zona Centro — Plan Beatriz Salas',d:'<strong>¿Por qué?</strong> Centro cayó de $8.8B (2024) a $6.5B (2025) → -$2.3B. Diana Becerra cayó -53.3% YoY. Es la mayor pérdida del portafolio.<br><strong>Acción:</strong> Diagnóstico de clientes perdidos. Reunión urgente con Colsubsidio y Cruz Verde (clientes clave de Becerra). Redesarrollar cartera activa en Bogotá.<br><strong>Responsable:</strong> Beatriz Salas + Diana Becerra',kpi:'+$500M en Centro H2 · Recuperar Colsubsidio',plazo:'Jun–Jul'},
+  ];
+  const important=[
+    {t:'4. Amor & Amistad (Sep) + Black Friday (Nov)',d:'<strong>¿Por qué?</strong> Septiembre históricamente representa el 9.6% del año (mayor mes en 2025). Noviembre tiene BF con alto potencial cosméticos.<br><strong>Acción:</strong> Kit regalo Fagron (Sunglasses + Fresh Skin + NEOCRIN) para cadenas. Precio especial. Activación digital 3 semanas antes. Propuesta a Colsubsidio, Cruz Verde y Bella Piel.<br><strong>Responsable:</strong> Mercadeo + todo el equipo comercial',kpi:'Meta: $250M+ en cosméticos Sep-Nov',plazo:'Sep + Nov'},
+    {t:'5. Expansión Mix en Top 5 Clientes Institucionales',d:'<strong>¿Por qué?</strong> Audifarma ($1.39B) y Farmacia Institucional ($535M) compran principalmente magistrales. Cross-sell de cosméticos puede ampliar ticket significativamente.<br><strong>Acción:</strong> Propuesta comercial formal de ampliación de portafolio para Audifarma, Farmacia Institucional, Cafam y Neuromédica. Incluir cosméticos terminados y activos en mix.<br><strong>Responsable:</strong> Juan Loaiza + Gerentes',kpi:'+15% ticket promedio clientes institucionales',plazo:'Jul–Sep'},
+    {t:'6. Corregir Inconsistencias de Datos — IT + Gerentes',d:'<strong>¿Por qué?</strong> 11 asesores en zonas múltiples distorsionan KPIs, comisiones y análisis territorial. Los -$777M en Otras Actividades ocultan la rentabilidad real.<br><strong>Acción:</strong> Reunión con gerentes y TI. Mapear la zona correcta de cada asesor. Limpiar valores negativos. Normalizar campos duplicados.<br><strong>Responsable:</strong> IT + Beatriz Salas + Erika López',kpi:'0 asesores multi-zona al 31 julio',plazo:'Jun–Jul'},
+  ];
+  const support=[
+    {t:'7. Maira Acosta (MP) — Consolidar Canal B2B',d:'Con +130.2% YoY, MP es el canal de mayor crecimiento. Contratos marco con Megalabs y Munera Jaramillo. Catálogo técnico digital para formuladores.<br><strong>Meta:</strong> Llevar MP de $1.3B a $2B en 2026.',kpi:'+50% en MP vs 2025'},
+    {t:'8. Contenido Digital & E-commerce Cosméticos',d:'Sunglasses, Fresh Skin y ABSORB-K tienen alto potencial D2C. Instagram y TikTok para dermocosmética. SEO para "Fagron cosméticos Colombia". Activar canal e-commerce o alianza con marketplace.<br><strong>Meta:</strong> 5% del sell-out de cosméticos por canal digital.',kpi:'Canal digital activo Q3'},
+    {t:'9. Programa Sell-Out Top 10 Clientes',d:'Solo Colsubsidio reporta sell-out. Proponer programa de datos compartidos con Audifarma, Cruz Verde, Pasteur, Cafam y Bella Piel. Incentivo: descuento o bonificación por información.<br><strong>Meta:</strong> 5 nuevos clientes reportando sell-out.',kpi:'5 clientes con sell-out Q4'},
+  ];
+
+  const planKpis=[
+    {l:'Meta H2 Esperado',v:'$12.3B–$14.2B',note:'COP'},
+    {l:'Crecimiento H2',v:'+20–40%',note:'vs H2 2025'},
+    {l:'Meta Anual 2026',v:'$20.7B–$23.9B',note:'Esperado–Acelerado'},
+    {l:'Dermatos Visitados',v:'100/mes',note:'Dermatólogos activos'},
+    {l:'Sell-Out Cosméticos',v:'+30%',note:'Jun–Ago vs 2025'},
+    {l:'Clientes Reactivados',v:'50+',note:'Zona Centro'},
+  ];
+
+  const crit=document.getElementById('actions-critical');
+  const imp=document.getElementById('actions-important');
+  const sup=document.getElementById('actions-support');
+  const pk=document.getElementById('plan-kpis');
+
+  crit.innerHTML=critical.map(a=>`<div style="background:var(--white);border-radius:6px;padding:14px 18px;border-left:4px solid var(--red);box-shadow:0 1px 4px rgba(0,0,0,.08)"><div style="font-size:13px;font-weight:700;margin-bottom:6px">${a.t}</div><div style="font-size:11px;line-height:1.7;color:var(--dark)">${a.d}</div><div style="margin-top:8px"><span class="tag">📊 ${a.kpi}</span><span class="tag">📅 ${a.plazo}</span></div></div>`).join('');
+  imp.innerHTML=important.map(a=>`<div style="background:var(--white);border-radius:6px;padding:14px 18px;border-left:4px solid ${AMBER};box-shadow:0 1px 4px rgba(0,0,0,.08)"><div style="font-size:13px;font-weight:700;margin-bottom:6px">${a.t}</div><div style="font-size:11px;line-height:1.7;color:var(--dark)">${a.d}</div><div style="margin-top:8px"><span class="tag">📊 ${a.kpi}</span><span class="tag">📅 ${a.plazo}</span></div></div>`).join('');
+  sup.innerHTML=support.map(a=>`<div style="background:var(--white);border-radius:6px;padding:14px 18px;border-left:4px solid ${GREEN};box-shadow:0 1px 4px rgba(0,0,0,.08)"><div style="font-size:13px;font-weight:700;margin-bottom:6px">${a.t}</div><div style="font-size:11px;line-height:1.7;color:var(--dark)">${a.d}</div><div style="margin-top:8px"><span class="tag">📊 ${a.kpi}</span></div></div>`).join('');
+  pk.innerHTML=planKpis.map(k=>`<div style="padding:10px;background:var(--light);border-radius:5px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--red);margin-bottom:4px">${k.l}</div><div style="font-size:15px;font-weight:700">${k.v}</div><div style="font-size:10px;color:${GRAY}">${k.note}</div></div>`).join('');
+}
+
+// Init
+buildPage(0);
+</script>
+</body>
 </html>
